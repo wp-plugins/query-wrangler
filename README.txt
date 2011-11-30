@@ -1,5 +1,5 @@
 === Query Wrangler ===
-Contributors: daggerhart
+Contributors: daggerhart, forrest.livengood
 Tags: query, pages, widget, admin, widgets, administration, manage, views
 Requires at least: 3
 Tested up to: 3.2.1
@@ -28,11 +28,19 @@ This plugin will bring extreme flexibility to WordPress users with it's ability 
 
 The easiest way is to add it as a custom link in the Menus section of your site.
 
+= How do I use query shortcodes? =
+
+Easy, the code you're lookind for looks like this.   [query id=2] , where the number 2 is the query id.
+
 == Screenshots ==
 
 1. Query Wrangler edit screen
 
 == Changelog ==
+
+= 1.2beta2 =
+
+ * Added shortcodes for inserting any query into a post.
 
 = 1.2beta1 =
 
@@ -49,4 +57,4 @@ The easiest way is to add it as a custom link in the Menus section of your site.
 
 == Upgrade Notice ==
 
-1.2beta1 Added Wordpress page overrides for categories and tags, fixed query edit page js bug.
+1.2beta2 Added shortcodes for inserting any query into a post

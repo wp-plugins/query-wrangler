@@ -1,13 +1,13 @@
 <?php
 /*
 Plugin Name: Query Wrangler
-Plugin URI: http://www.daggerhart.com
+Plugin URI: http://www.widgetwrangler.com/query-wrangler
 Description: This plugin lets you create new WP queries as pages or widgets. It's basically Drupal Views for Wordpress.
-Author: Jonathan Daggerhart
-Version: 1.2beta1
-Author URI: http://www.daggerhart.com
+Author: Jonathan Daggerhart, Forrest Livengood
+Version: 1.2beta2
+Author URI: http://www.websmiths.co
 */
-/*  Copyright 2010  Jonathan Daggerhart  (email : jonathan@daggerhart.com)
+/*  Copyright 2010  Websmiths  (email : team@websmiths.co)
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License, version 2, as 
   published by the Free Software Foundation.
@@ -322,4 +322,15 @@ function qw_edit_query_form()
     // include the edit form
     include QW_PLUGIN_DIR.'/forms/form.query-edit.inc'; 
   }
+}
+
+
+add_shortcode('query','qw_single_query_shortcode');
+/*
+ * Shortcode support for all queries
+ */
+function qw_single_query_shortcode($atts) {
+  $short_array = shortcode_atts(array('id' => ''), $atts);
+  extract($short_array);
+  return qw_execute_query($id);
 }
