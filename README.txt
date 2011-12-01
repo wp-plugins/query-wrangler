@@ -38,6 +38,11 @@ Easy, the code you're lookind for looks like this.   [query id=2] , where the nu
 
 == Changelog ==
 
+= 1.2beta3 =
+
+ * Bug fix for empty category and tag pages
+ * Bug fix for query shortcodes
+
 = 1.2beta2 =
 
  * Added shortcodes for inserting any query into a post.
@@ -57,4 +62,4 @@ Easy, the code you're lookind for looks like this.   [query id=2] , where the nu
 
 == Upgrade Notice ==
 
-1.2beta2 Added shortcodes for inserting any query into a post
+1.2beta3  Multiple bug fixes
