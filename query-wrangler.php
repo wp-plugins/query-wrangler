@@ -1,13 +1,21 @@
 <?php
 /*
+Contributors: daggerhart, forrest.livengood
 Plugin Name: Query Wrangler
 Plugin URI: http://www.widgetwrangler.com/query-wrangler
-Description: This plugin lets you create new WP queries as pages or widgets. It's basically Drupal Views for Wordpress.
-Author: Jonathan Daggerhart, Forrest Livengood
-Version: 1.2beta3
+Tags: query, pages, widget, admin, widgets, administration, manage, views
 Author URI: http://www.websmiths.co
+Author: Jonathan Daggerhart, Forrest Livengood
+Donate link: http://www.widgetwrangler.com/
+Requires at least: 3
+Tested up to: 3.2.1
+Stable tag: trunk
+Version: 1.3beta1
 */
-/*  Copyright 2010  Websmiths  (email : team@websmiths.co)
+// Note: There are 3 places to change the version number; below, above, and in readme.txt
+define('QW_VERSION', 1.3);
+
+/*  Copyright 2010  Jonathan Daggerhart  (email : jonathan@daggerhart.com)
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License, version 2, as 
   published by the Free Software Foundation.
@@ -25,32 +33,92 @@ define('QW_PLUGIN_DIR', dirname(__FILE__));
 define('QW_PLUGIN_URL', get_bloginfo('wpurl')."/wp-content/plugins/query-wrangler");
 
 // include Query Widgets functions
-include QW_PLUGIN_DIR.'/query.inc';
+include_once QW_PLUGIN_DIR.'/query.inc';
 // Theme functions
-include QW_PLUGIN_DIR.'/theme.inc';
+include_once QW_PLUGIN_DIR.'/theme.inc';
 // Query page handling
-include QW_PLUGIN_DIR.'/pages.inc';
+include_once QW_PLUGIN_DIR.'/pages.inc';
+// Wordpress hooks
+include_once QW_PLUGIN_DIR.'/data.hooks.inc';
 // Field and field style definitions
-include QW_PLUGIN_DIR.'/data.fields.inc';
+include_once QW_PLUGIN_DIR.'/data.defaults.inc';
 // Query Widget
-include QW_PLUGIN_DIR.'/widget-query.php';
+include_once QW_PLUGIN_DIR.'/widget.query.php';
+
+// include Template Wrangler
+if(!function_exists('theme')){
+  include_once QW_PLUGIN_DIR.'/template-wrangler.inc';
+}
 
 /*
- * Ajax including form
+ * Checking current version of plugin to handle upgrades
  */
-function qw_form_field_ajax(){
-  // image sizes
-  $image_sizes = get_intermediate_image_sizes();
-  // file styles
-  $file_styles = qw_file_styles();
-  // set some data from POST
-  $field_name = $_POST['field_name'];
-  $field_settings['type'] = $_POST['field_type'];
-  include QW_PLUGIN_DIR.'/forms/form.query-field.inc';
+function qw_check_version()
+{
+  if($version = get_option('qw_plugin_version')){
+    // just setting up internal versioning for now
+    // include QW_PLUGIN_DIR.'/upgrade.php';
+  }
+  else
+  {
+    // first upgrade
+    include QW_PLUGIN_DIR.'/upgrade.php';
+    qw_upgrade_12_to_13();
+    // set our version numer
+    update_option('qw_plugin_version', QW_VERSION);
+  }
+}
+add_action('admin_init', 'qw_check_version');
+
+/*
+ * Ajax form templates
+ */
+function qw_form_ajax(){
+  
+  if($_POST['form'] == 'field_form'){
+    $args = array(
+      'image_sizes' => get_intermediate_image_sizes(),
+      'file_styles' => qw_all_file_styles(),
+      'field_name' => $_POST['name'],
+      'field_settings' => array(
+        'type' => $_POST['type'],
+      ),   
+    );
+    print theme('query_field', $args);
+  }
+  else if($_POST['form'] == 'field_sortable'){
+    $args = array(
+      'field_name' => $_POST['name'],
+      'type' => $_POST['type'],
+      'weight' => $_POST['next_weight'],
+    );
+    print theme('query_field_sortable', $args);
+  }
+  else if($_POST['form'] == 'filter_form')
+  {
+    $args = array(
+      'filter_type' => $_POST['type'],
+      'filter_name' => $_POST['name'],
+      'query_type' => $_POST['query_type'],
+      'post_types' => qw_all_post_types(),
+      'category_ids' => get_all_category_ids(),
+      'tags' => get_tags(array('hide_empty' => false)),
+    );
+    print theme('query_filter', $args);
+  }
+  else if($_POST['form'] == 'filter_sortable') {
+    $args = array(
+      'filter_type' => $_POST['type'],
+      'filter_name' => $_POST['name'],
+      'weight' => $_POST['next_weight'],
+    );
+    print theme('query_filter_sortable', $args);
+  }
+  
   exit;
 }
-add_action( 'wp_ajax_nopriv_qw_form_field_ajax', 'qw_form_field_ajax' );
-add_action( 'wp_ajax_qw_form_field_ajax', 'qw_form_field_ajax' );
+add_action( 'wp_ajax_nopriv_qw_form_ajax', 'qw_form_ajax' );
+add_action( 'wp_ajax_qw_form_ajax', 'qw_form_ajax' );
 
 /*
  * Javascript for query page
@@ -69,7 +137,44 @@ function qw_admin_js(){
                   false,
                   true);
   // declare the URL to the file that handles the AJAX request (wp-admin/admin-ajax.php)
-  wp_localize_script( 'qw-admin-js', 'QueryWrangler', array( 'formField' => admin_url( 'admin-ajax.php' ) ) );
+
+  // @TODO: make LOTS of things available as js objects.  almost everything
+  $data = array(
+    'ajaxForm' => admin_url( 'admin-ajax.php' ),
+    'allFields' => qw_all_fields(),
+    'allFieldStyles' => qw_all_field_styles(),
+    'allPostTypes' => qw_all_post_types,
+    'allPagerTypes' => qw_all_pager_types(),
+    'allImageSizes' => get_intermediate_image_sizes(),
+    'allFileStyles' => qw_all_file_styles(),
+    'allFilters'  => qw_all_filters(),
+  );
+
+  // editing a query  
+  if($query_id = $_GET['edit'])  
+  {
+    // get the query
+    global $wpdb;
+    $table_name = $wpdb->prefix."query_wrangler";
+    $sql = "SELECT name,type,data,path FROM ".$table_name." WHERE id = ".$query_id." LIMIT 1";
+    $row = $wpdb->get_row($sql);
+    
+    $additional_data ['query'] = array(
+      'id' => $query_id,
+      'options' => unserialize($row->data),
+      'name' => $row->name,
+      'type' => $row->type,
+    );
+    
+    $data = array_merge($data, $additional_data);
+  }
+  
+  wp_localize_script( 'qw-admin-js',
+                      'QueryWrangler',
+                      array(
+                        'l10n_print_after' => 'QueryWrangler = ' . json_encode( $data ) . ';'
+                      )
+                    );
 }
 // Add js
 if($_GET['page'] == 'query-wrangler'){
@@ -134,12 +239,9 @@ add_action( 'admin_menu', 'qw_menu');
 
 /*
  * Simple debugging location
- */
-//function qw_debug(){
-//  print '<pre>';
-//  print_r(get_pages());
-//  print '</pre>';
-//}
+ *
+function qw_debug(){}
+// */
 
 /*
  * Handle the display of pages and actions
@@ -189,10 +291,95 @@ function qw_page_handler(){
 /*
  * Create Query Page
  */
-function qw_create_query()
-{
-  include QW_PLUGIN_DIR.'/forms/form.query-create.inc';
+function qw_create_query() {
+  $args = array(
+    'title' => 'Create Query',
+    'content' => theme('query_create')
+  );
+  
+  print theme('admin_wrapper', $args);
 }
+/*
+ * Query Edit Page
+ */ 
+function qw_edit_query_form()
+{
+  if($_GET['edit'])
+  {
+    $query_id = $_GET['edit'];  
+    // get the query
+    global $wpdb;
+    $table_name = $wpdb->prefix."query_wrangler";
+    $sql = "SELECT name,type,data,path FROM ".$table_name." WHERE id = ".$query_id." LIMIT 1";
+    $row = $wpdb->get_row($sql);
+    
+    $post_types = qw_all_post_types();
+    
+    // start building edit page data
+    $edit_args = array(
+      'query_id' => $query_id,
+      'qw_query_options' => unserialize($row->data),
+      'query_name' => $row->name,
+      'query_type' => $row->type,
+      // categories
+      'category_ids' => get_all_category_ids(),
+      // tags
+      'tags' => get_tags(array('hide_empty' => false)),
+      // image sizes
+      'image_sizes' => get_intermediate_image_sizes(),
+      // file styles
+      'file_styles' => qw_all_file_styles(),
+      // all qw fields
+      'fields' => qw_all_fields(),
+      // all qw field styles
+      'field_styles' => qw_all_field_styles(),
+      // all filters
+      'filters' => qw_all_filters(),
+      // all WP post types available for QWing
+      'post_types' => $post_types,
+      // all Pager Types
+      'pager_types' => qw_all_pager_types(),
+    );
+    
+    // sort fields according to weight  
+    if(is_array($edit_args['qw_query_options']['display']['field_settings']['fields'])){  
+      uasort($edit_args['qw_query_options']['display']['field_settings']['fields'],'qw_cmp');
+    }
+    
+    // sort filters according to weight  
+    if(is_array($edit_args['qw_query_options']['args']['filters'])){  
+      uasort($edit_args['qw_query_options']['args']['filters'],'qw_cmp');
+    }    
+    
+    // overrides
+    if($row->type == 'override'){
+      $edit_args['query_override_type'] = $row->override_type;
+    }
+    
+    // Page Queries
+    if($row->type == 'page'){
+      $edit_args['query_page_path'] = $row->path;
+      $edit_args['query_page_title'] = $edit_args['qw_query_options']['display']['title'];
+      $edit_args['page_templates'] = get_page_templates();
+    }
+    
+    // admin wrapper arguments
+    $admin_args = array(
+      'title' => 'Edit query <em>'.$edit_args['query_name'].'</em>',
+      // content is the query_edit page
+      'content' => theme('query_edit', $edit_args)
+    );
+    
+    // add view link for pages
+    if($row->type == 'page' && isset($row->path)){
+      $admin_args['title'].= ' <a class="add-new-h2" target="_blank" href="'.get_bloginfo('wpurl').$row->path.'">View</a>';
+    }
+    
+    // include the edit form
+    print theme('admin_wrapper', $admin_args); 
+  }
+}
+
 /*
  * Create the new Query
  * 
@@ -282,7 +469,7 @@ function qw_update_query($post){
       $terms = array_merge($terms, array_keys($post['qw-query-options']['override']['cats']));
     }
     // merge tags
-    if(is_array($post['qw-query-options']['override']['cats'])){
+    if(is_array($post['qw-query-options']['override']['tags'])){
       $terms = array_merge($terms, array_keys($post['qw-query-options']['override']['tags']));
     }
     
@@ -313,16 +500,6 @@ function qw_delete_query($query_id){
   $sql = "DELETE FROM ".$table_name." WHERE id = ".$query_id;
   $wpdb->query($sql);  
 }
-/*
- * Query Edit Page
- */ 
-function qw_edit_query_form()
-{
-  if($_GET['edit']){
-    // include the edit form
-    include QW_PLUGIN_DIR.'/forms/form.query-edit.inc'; 
-  }
-}
 
 /*
  * Shortcode support for all queries
@@ -342,7 +519,7 @@ function qw_single_query_shortcode($atts) {
   
   // get the themed content
   $themed = qw_template_query($wp_query, $options);
-  // reset, because wp hates programmers
+  // reset because worpress hates programmers
   wp_reset_postdata();
   return $themed;
 }

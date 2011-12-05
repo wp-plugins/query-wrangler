@@ -1,20 +1,32 @@
 === Query Wrangler ===
 Contributors: daggerhart, forrest.livengood
+Plugin Name: Query Wrangler
+Plugin URI: http://www.widgetwrangler.com/query-wrangler
 Tags: query, pages, widget, admin, widgets, administration, manage, views
+Author URI: http://www.websmiths.co
+Author: Jonathan Daggerhart, Forrest Livengood
+Donate link: http://www.widgetwrangler.com/
 Requires at least: 3
 Tested up to: 3.2.1
 Stable tag: trunk
+Version: 1.3beta1
 
 This plugin lets you create new WP queries as pages or widgets. It's basically Drupal Views for Wordpress.
 
 == Description ==
 
-This plugin lets you create new WP queries as pages or widgets. It's basically Drupal Views for WordPress.
+This plugin lets you create new WP queries as pages or widgets.  It also allows you to override the way category and tag pages display.
 
-Highly based on Drupal's Views, the Query Wrangler's interface is highly intuitive for any Drupal View's user.
+Query Wrangler's interface is highly intuitive way to create queries and will be second nature for any Drupal Views user.
 
-This plugin will bring extreme flexibility to WordPress users with it's ability to create custom queries using the WP_Query class. 
+This plugin will bring extreme flexibility to WordPress users with its ability to create custom queries using the WP_Query class with a user interface.
 
+Some examples of how you would use this plugin include:
+
+* Create a list of pages or posts with a specific category or tag
+* Create an image gallery
+* Modify the way your category pages look
+* Create a category list widget with custom sorting
 
 == Installation ==
 
@@ -32,11 +44,25 @@ The easiest way is to add it as a custom link in the Menus section of your site.
 
 Easy, the code you're lookind for looks like this.   [query id=2] , where the number 2 is the query id.
 
+= What are overrides and how do I use them? =
+
+Overrides allow you to alter the display and information given on category and tag pages.
+For a simple example, add a new query and chose the type `override`.  Choose what you want to display then examine the `Override Settings` options.
+Select a category or multiple categories to override.   Save the query, then visit that category page.
+
 == Screenshots ==
 
 1. Query Wrangler edit screen
 
 == Changelog ==
+
+= 1.3beta1 =
+
+ * Added Wordpress hooks for fields, field styles, filters, and pagers
+ * Fixed some bugs with replacement tokens and rewriting output
+ * Fixed some templates from displaying excluded fields
+ * Determined methodology for field callbacks and arguments
+ * Shortcode support for fields
 
 = 1.2beta3 =
 
@@ -45,7 +71,7 @@ Easy, the code you're lookind for looks like this.   [query id=2] , where the nu
 
 = 1.2beta2 =
 
- * Added shortcodes for inserting any query into a post.
+ * Added shortcode support
 
 = 1.2beta1 =
 
@@ -62,4 +88,4 @@ Easy, the code you're lookind for looks like this.   [query id=2] , where the nu
 
 == Upgrade Notice ==
 
-1.2beta3  Multiple bug fixes
+1.3beta1 Added wordpress hooks, improved fields, lots of other fixes and improvements.  Made filters act like fields
