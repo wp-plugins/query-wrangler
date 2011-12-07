@@ -87,27 +87,29 @@ function qw_generate_query_args($options = array(), $options_override = array())
   //$args['']              = $options['args'][''];
   
   // handle filters
-  foreach($options['args']['filters'] as $filter)
-  {
-    if($filter['type'] == 'categories'){
-      if($filter['cat_operator'] == 'cat'){
-        $args[$filter['cat_operator']] = implode(",", array_keys($filter['cats']));
+  if(is_array($options['args']['filters'])){
+    foreach($options['args']['filters'] as $filter)
+    {
+      if($filter['type'] == 'categories'){
+        if($filter['cat_operator'] == 'cat'){
+          $args[$filter['cat_operator']] = implode(",", array_keys($filter['cats']));
+        }
+        else {
+          $args[$filter['cat_operator']] = $filter['cats'];
+        }
       }
-      else {
-        $args[$filter['cat_operator']] = $filter['cats'];
+      else if($filter['type'] == 'tags'){
+        $args[$filter['tag_operator']] = array_keys($filter['tags']);
       }
-    }
-    else if($filter['type'] == 'tags'){
-      $args[$filter['tag_operator']] = array_keys($filter['tags']);
-    }
-    else if($filter['type'] == 'post_types'){
-      $args['post_type'] = $filter['post_types'];
-    }
-    else if($filter['type'] == 'post_status'){
-      $args['post_status'] = $filter['post_status'];
-    }
-    else if($filter['type'] == 'post_parent'){
-      $args['post_parent'] = $filter['post_parent'];
+      else if($filter['type'] == 'post_types'){
+        $args['post_type'] = $filter['post_types'];
+      }
+      else if($filter['type'] == 'post_status'){
+        $args['post_status'] = $filter['post_status'];
+      }
+      else if($filter['type'] == 'post_parent'){
+        $args['post_parent'] = $filter['post_parent'];
+      }
     }
   }
   
@@ -126,12 +128,14 @@ function qw_get_all_widgets()
   $sql = "SELECT id,name FROM ".$table_name." WHERE type = 'widget'";
   $rows = $wpdb->get_results($sql);
   
-  $widgets = array();
-  foreach($rows as $row){
-    $widgets[$row->id] = $row->name;
+  if(is_array($rows))
+  {
+    $widgets = array();
+    foreach($rows as $row){
+      $widgets[$row->id] = $row->name;
+    }
+    return $widgets;
   }
-  
-  return $widgets;
 }
 /*
  * Get all query pages
@@ -145,20 +149,22 @@ function qw_get_all_pages()
   $sql = "SELECT id,name,path FROM ".$table_name." WHERE type = 'page'";
   $rows = $wpdb->get_results($sql);
   
-  $pages = array();
-  $blog_url = get_bloginfo('wpurl');
-  
-  $i=0;
-  foreach($rows as $row){
-    $pages[$i] = new stdClass();
-    $pages[$i]->ID = $row->id;
-    $pages[$i]->title = $row-name;
-    $pages[$i]->post_title = $row->name;
-    $pages[$i]->guid = $blog_url.$row->path;
-    $pages[$i]->post_type = 'page';
+  if(is_array($rows)){
+    $pages = array();
+    $blog_url = get_bloginfo('wpurl');
+    
+    $i=0;
+    foreach($rows as $row){
+      $pages[$i] = new stdClass();
+      $pages[$i]->ID = $row->id;
+      $pages[$i]->title = $row-name;
+      $pages[$i]->post_title = $row->name;
+      $pages[$i]->guid = $blog_url.$row->path;
+      $pages[$i]->post_type = 'page';
+    }
+    
+    return $pages;
   }
-  
-  return $pages;  
 }
 
 /*
@@ -178,7 +184,7 @@ function qw_default_query_data(){
       'filters'         => array(),
     ),
     'display' => array(
-      'type' => 'full',
+      'type' => 'posts',
       'full_settings' => array(
         'style' => 'complete',
       ),
@@ -192,7 +198,8 @@ function qw_default_query_data(){
  * Slug creation
  */
 function qw_make_slug($string){
-  return stripcslashes(preg_replace('/[\s_\'\"]/','_', strtolower(strip_tags($string))));
+  $search = array("!","@","#","$","%","^","&","*","(",")","-","+","=","{","}","[","]","\\","|",":",";","'","<",",",">",".","?","/","~","`");
+  return str_replace(" ", "_", strtolower(str_replace($search, "", strip_tags($string))));
 }
 /*
  * usort callback. I likely stole this from somewhere.. like php.net
