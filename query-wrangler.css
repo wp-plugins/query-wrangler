@@ -1,3 +1,6 @@
+#qw-edit-query-form textarea {
+  font-family: monospace;
+}
 a.toplevel_page_query-wrangler {
   letter-spacing: -1px;
 }
@@ -34,6 +37,15 @@ a.toplevel_page_query-wrangler {
 }
 #qw-query-action-buttons {
   padding: 4px 14px;
+  background: #efefef;
+  -webkit-border-radius: 8px;
+  -moz-border-radius: 8px;
+  border-radius: 8px;
+}
+#query-actions {
+  text-align: right;
+  line-height: 40px;
+  padding-left: 100px;
 }
 #qw-options-target,
 #query-preview {
@@ -45,7 +57,7 @@ a.toplevel_page_query-wrangler {
 #qw-options-target-title,
 #preview-title {
   margin: 0px 0px 12px;
-  padding: 6px 12px;
+  padding: 10px 12px;
   background-color: #efefef;
 }
 #query-preview .qw-options-group-content {
@@ -72,8 +84,7 @@ a.toplevel_page_query-wrangler {
 #qw-query-fields-list,
 #qw-query-filters-list {
   border-top: 1px solid #bbb;
-  padding: 4px 16px;
-  text-transform: capitalize;
+  padding: 4px 0px;
 }
 #qw-show-arguments {
   margin-top: 32px;
@@ -82,14 +93,6 @@ a.toplevel_page_query-wrangler {
 }
 #qw-form-backup {
   display: none;
-}
-#qw-fields-sortable .qw-item,
-.qw-query-content select,
-.qw-query-content select option,
-.qw-field-checkbox,
-.qw-field-title,
-.qw-filter-title {
-  text-transform: capitalize;
 }
 .qw-button {
   display: block;
@@ -109,18 +112,25 @@ a.toplevel_page_query-wrangler {
   background: url("images/white-grad.png") repeat-x scroll left top #F2F2F2;
   text-shadow: 0 1px 0 #FFFFFF;
 }
-span.qw-query-title {
+div.qw-query-title {
   display: block;
-  padding: 1px 5px;
-  font-size: 0.9em;
+  padding: 2px 8px;
 }
-span.qw-query-title span,
-span.qw-query-fields-name,
-span.qw-query-filters-name {
+div.qw-query-title span.qw-setting-value,
+#qw-query-filters-list span.qw-setting-title,
+#qw-query-fields-list span.qw-setting-title {
   color: blue;
   text-decoration: underline;
   cursor: pointer;
+  font-weight: bold;
 }
+#qw-query-filters-list span.qw-setting-value,
+#qw-query-fields-list span.qw-setting-value {
+  color: black;
+  text-decoration: none;
+  font-weight: normal;
+}
+
 label.qw-query-checkbox,
 label.qw-field-checkbox,
 label.qw-filter-checkbox {
@@ -204,8 +214,7 @@ li.qw-filter-item .sort-handle {
   margin: 4px 6px 0px;
   padding: 3px 8px;
 }
-.qw-query-fields-title,
-.qw-query-filters-title {
+.qw-query-add-titles span {
   display: block;
   text-align: center;
   width: 48%;
@@ -215,7 +224,7 @@ li.qw-filter-item .sort-handle {
   cursor: pointer;
 }
 
-.qw-sort-field-name,
+.qw-field-title,
 .qw-sort-filter-name {
   display: none;
 }
@@ -241,9 +250,45 @@ li.qw-filter-item .sort-handle {
 .add-selected-wrapper {
   display: block;
   height: 40px;
-  background: transparent url('images/loading.gif') -40px top no-repeat;  
+  background: transparent url('images/loading.gif') -40px top no-repeat;
 }
 .add-selected-wrapper-active {
-  background: transparent url('images/loading.gif') left center no-repeat;  
+  background: transparent url('images/loading.gif') left center no-repeat;
   padding-left: 28px;
+}
+textarea.qw-meta-value {
+  width: 500px;
+  height: 120px;
+}
+#export-query {
+  width: 94%;
+  height: 600px;
+  font-family: monospace;
+}
+#import-query {
+  width: 94%;
+  height: 300px;
+  font-family: monospace;
+}
+#query-preview-controls {
+  float: right;
+  line-height: 40px;
+  margin-right: 20px;
+}
+.query-preview-inactive {
+  background: transparent url('images/loading.gif') -40px center no-repeat;
+}
+.query-preview-active {
+  padding-left: 40px;
+  background: transparent url('images/loading.gif') left center no-repeat;
+}
+#query-preview-controls .qw-button {
+  float: right;
+  margin-left: 20px;
+}
+.qw-changes {
+  display: none;
+}
+.qw-modified {
+  background-color: #FFFFE0;
 }
