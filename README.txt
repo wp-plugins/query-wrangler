@@ -1,17 +1,12 @@
 === Query Wrangler ===
 Contributors: daggerhart, forrest.livengood
-Plugin Name: Query Wrangler
-Plugin URI: http://www.widgetwrangler.com/query-wrangler
-Tags: query, pages, widget, admin, widgets, administration, manage, views
-Author URI: http://www.websmiths.co
-Author: Jonathan Daggerhart, Forrest Livengood
 Donate link: http://www.widgetwrangler.com/
+Tags: query, pages, widget, admin, widgets, administration, manage, views
 Requires at least: 3
-Tested up to: 3.2.1
+Tested up to: 3.3.1
 Stable tag: trunk
-Version: 1.4.1beta
 
-This plugin lets you create new WP queries as pages or widgets. It's basically Drupal Views for Wordpress.
+Query Wrangler provides an intuitive interface for creating complex WP queries as pages or widgets. Based on Drupal Views.
 
 == Description ==
 
@@ -21,9 +16,13 @@ Query Wrangler's interface is highly intuitive way to create queries and will be
 
 This plugin will bring extreme flexibility to WordPress users with its ability to create custom queries using the WP_Query class with a user interface.
 
+Additional Plugins
+
+* [Query Slideshow](http://wordpress.org/extend/plugins/query-slideshow/ "Query Slideshow") - Turn your queries into slideshows using jquery.cycle
+
 Some examples of how you would use this plugin include:
 
-* Create a list of pages or posts with a specific category or tag
+* Create a list of pages or posts within a specific category or tag
 * Create an image gallery
 * Modify the way your category pages look
 * Create a category list widget with custom sorting
@@ -54,9 +53,16 @@ Select a category or multiple categories to override.   Save the query, then vis
 
 == Screenshots ==
 
-1. Query Wrangler edit screen
+1. Drupal Views Editor Theme
+1. Tabs Editor Theme
 
 == Changelog ==
+
+= 1.5rc1 =
+
+ * Major API enhancements
+ * New simpler editor theme
+ * Lots of Refactoring
 
 = 1.4.1beta =
 
@@ -109,4 +115,4 @@ Select a category or multiple categories to override.   Save the query, then vis
 
 == Upgrade Notice ==
 
-1.4.1beta Bug fixes, api enhancement, UI improvement
+1.5rc1 API enhancements & UI improvement

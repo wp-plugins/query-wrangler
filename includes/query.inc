@@ -12,7 +12,7 @@ function qw_execute_query($query_id, $options_override = array(), $reset_post_da
   global $wp_query;
   // backup the old query
   $old_query = $wp_query;
-  $wp_query = null;
+
 
   // get the query options
   $options = qw_generate_query_options($query_id, $options_override);
@@ -20,8 +20,14 @@ function qw_execute_query($query_id, $options_override = array(), $reset_post_da
   // get formatted query arguments
   $args = qw_generate_query_args($options);
 
+// pre_query hook
+  do_action_ref_array('qw_pre_query', array(&$args));
+
   // set the new query
   $wp_query = new WP_Query($args);
+
+// pre_render hook
+  do_action_ref_array('qw_pre_render', array(&$options));
 
   // get the themed content
   $themed = qw_template_query($wp_query, $options);
@@ -90,24 +96,49 @@ function qw_generate_query_options($query_id, $options_override = array(), $full
  */
 function qw_generate_query_args($options = array(), $options_override = array())
 {
-  $filters = qw_all_filters();
+  $all_filters = qw_all_filters();
+  $all_sorts = qw_all_sort_options();
 
   // standard arguments
   $args['posts_per_page'] = ($options['args']['posts_per_page']) ? $options['args']['posts_per_page']: 5;
   $args['offset']         = ($options['args']['offset']) ? $options['args']['offset']: 0;
-  $args['orderby']        = ($options['args']['orderby']) ? $options['args']['orderby']: 'none';
-  $args['order']          = ($options['args']['order']) ? $options['args']['order']: 'ASC';
+  //$args['orderby']        = ($options['args']['orderby']) ? $options['args']['orderby']: 'none';
+  //$args['order']          = ($options['args']['order']) ? $options['args']['order']: 'ASC';
   $args['paged']          = $options['args']['paged'];
   $args['post_status']    = $options['args']['post_status'];
+
+  // handle sorts
+  if(is_array($options['args']['sorts'])){
+
+    foreach($options['args']['sorts'] as $sort)
+    {
+      $hook_key = qw_get_hook_key($all_sorts, $sort);
+      // combine sort details
+      if (isset($all_sorts[$hook_key])){
+        $sort = array_merge($all_sorts[$hook_key], $sort);
+      }
+
+      // look for callback, and run it
+      if (isset($sort['query_args_callback']) && function_exists($sort['query_args_callback'])){
+        $sort['query_args_callback']($args, $sort);
+      } else {
+        // else, default to type as WP_Query argument key
+        // arguments passed to query
+        $args[$sort['orderby_key']] = $sort['type'];
+        $args[$sort['order_key']] = $sort['order_value'];
+      }
+    }
+  }
 
   // handle filters
   if(is_array($options['args']['filters'])){
     // loop through all filters
     foreach($options['args']['filters'] as $filter)
     {
+      $hook_key = qw_get_hook_key($all_filters, $filter);
       // combine filter details
-      if (isset($filters[$filter['type']])){
-        $filter = array_merge($filters[$filter['type']], $filter);
+      if (isset($all_filters[$hook_key])){
+        $filter = array_merge($all_filters[$hook_key], $filter);
       }
 
       // look for callback, and run it
@@ -119,7 +150,6 @@ function qw_generate_query_args($options = array(), $options_override = array())
       }
     }
   }
-
   return $args;
 }
 /*
@@ -171,46 +201,6 @@ function qw_get_all_pages()
 
     return $pages;
   }
-}
-
-/*
- * Default values for  new query
- *
- * @return array Default query settings
- */
-function qw_default_query_data(){
-  return array(
-    'args' => array(
-      'posts_per_page'  => 5,
-      'offset'          => 0,
-      'cat_operator'    => 'cat',
-      'post_status'     => 'publish',
-      'orderby'         => 'date',
-      'order'           => 'ASC',
-      'filters'         => array(),
-    ),
-    'display' => array(
-      'style' => 'unformatted',
-      'row_style' => 'posts',
-      'post_settings' => array(
-        'size' => 'complete',
-      ),
-    ),
-  );
-}
-/*
- * Slug creation
- */
-function qw_make_slug($string){
-  $search = array("!","@","#","$","%","^","&","*","(",")","-","+","=","{","}","[","]","\\","|",":",";","'","<",",",">",".","?","/","~","`");
-  return str_replace(" ", "_", strtolower(str_replace($search, "", strip_tags($string))));
-}
-/*
- * usort callback. I likely stole this from somewhere.. like php.net
- */
-function qw_cmp($a,$b) {
-  if ($a['weight'] == $b['weight']) return 0;
-  return ($a['weight'] < $b['weight'])? -1 : 1;
 }
 
 /*
@@ -301,26 +291,15 @@ function qw_get_term($term, $by = 'id' , $return_type = OBJECT){
 function qw_trim(&$value){
   $value = trim($value);
 }
-function qw_handle_html(&$value, $key = ''){
-  if(is_string($value)){
-    // for some reason stripslashes isn't getting all slashes
-    $value = str_replace("\\", "", stripslashes(stripslashes($value)));
-  }
-}
-
-/*
- * Custom for outputting text/html into a textarea
- */
-function qw_textarea($value){
-  return esc_textarea(str_replace("\\", "", $value));
-}
 /*
  * Serialize wrapper functions for future changes.
  */
 function qw_serialize($array){
   return serialize($array);
 }
-// fix unserialize problem with quotation marks
+/*
+ * Custom: Fix unserialize problem with quotation marks
+ */
 function qw_unserialize($serial_str) {
   $serial_str= preg_replace('!s:(\d+):"(.*?)";!se', "'s:'.strlen('$2').':\"$2\";'", $serial_str );
   $serial_str= str_replace("\r", "", $serial_str);
@@ -333,4 +312,76 @@ function qw_unserialize($serial_str) {
     $array = array_map('stripslashes_deep', $array);
     return $array;
   }
+}
+/*
+ * Support function for legacy, pre hook_keys discovery
+ */
+function qw_get_hook_key($all, $single)
+{
+  // see if hook key is set
+  if (!empty($single['hook_key'])){
+    $hook_key = $single['hook_key'];
+  }
+  // look for type as key
+  else if (!empty($single['type']))
+  {
+    foreach ($all as $key => $item)
+    {
+      if($single['type'] == $all[$key]['type']){
+        $hook_key = $all[$key]['hook_key'];
+        break;
+      }
+      else if($single['type'] == $key){
+        $hook_key = $key;
+        break;
+      }
+    }
+  }
+  return $hook_key;
+}
+
+/*
+ * Generate form prefixes for handlers
+ *
+ * @param string
+ *    $type = sort, field, filter
+ */
+function qw_make_form_prefix($type, $name){
+  $output = "qw-query-options";
+  switch($type){
+    case 'sort':
+      $output.= "[args][sorts]";
+      break;
+    case 'field':
+      $output.= "[display][field_settings][fields]";
+      break;
+    case 'filter':
+      $output.= "[args][filters]";
+      break;
+  }
+  $output.= "[".$name."]";
+  return $output;
+}
+/*
+ * Function for grabbing meta keys
+ *
+ * @return array All meta keys in WP
+ */
+function qw_get_meta_keys() {
+	global $wpdb;
+
+	$keys = $wpdb->get_col( "
+			SELECT meta_key
+			FROM $wpdb->postmeta
+			GROUP BY meta_key
+			ORDER BY meta_key" );
+
+	return $keys;
+}
+/*
+ * usort callback. I likely stole this from somewhere.. like php.net
+ */
+function qw_cmp($a,$b) {
+  if ($a['weight'] == $b['weight']) return 0;
+  return ($a['weight'] < $b['weight'])? -1 : 1;
 }
