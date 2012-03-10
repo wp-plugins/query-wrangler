@@ -58,6 +58,11 @@ Select a category or multiple categories to override.   Save the query, then vis
 
 == Changelog ==
 
+= 1.5rc2 =
+
+ * Fix: meta field returning array
+ * Fix: page links missing starting slash
+
 = 1.5rc1 =
 
  * Major API enhancements
@@ -115,4 +120,4 @@ Select a category or multiple categories to override.   Save the query, then vis
 
 == Upgrade Notice ==
 
-1.5rc1 API enhancements & UI improvement
+1.5rc2 bug fixes
