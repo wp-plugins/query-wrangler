@@ -203,7 +203,7 @@ function qw_make_slug($string){
  * Custom for outputting text/html into a textarea
  */
 function qw_textarea($value){
-  return esc_textarea(str_replace("\\", "", $value));
+  return stripcslashes(esc_textarea(str_replace("\\", "", $value)));
 }
 
 /*
