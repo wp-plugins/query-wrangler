@@ -57,6 +57,10 @@ Select a category or multiple categories to override.   Save the query, then vis
 1. Tabs Editor Theme
 
 == Changelog ==
+= 1.5rc5 =
+
+ * Fix: bug, javascript sometimes enqueuing in wrong order (Google Libraries)
+
 = 1.5rc4 =
 
  * Fix: bug, custom label and rewrite output fields not showing up.
