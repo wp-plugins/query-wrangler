@@ -131,4 +131,4 @@ Select a category or multiple categories to override.   Save the query, then vis
 
 == Upgrade Notice ==
 
-1.5rc3 Fixed major bug with query page paths not working correctly.
+1.5rc5 Bug fixes
