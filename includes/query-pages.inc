@@ -1,0 +1,274 @@
+<?php
+// hooks
+add_filter('request', 'qw_remove_page_from_query_string');
+add_action('wp', 'qw_query_pages_handler');
+
+// http://wordpress.org/support/topic/explanation-and-workaround-for-error-404-on-category-pagination?replies=3
+// http://wordpress.org/extend/plugins/category-pagination-fix/
+
+// this works for categories!
+// taken from category-pagination-fix plugin and modified
+function qw_remove_page_from_query_string($query_string)
+{
+  // fix tags
+  if(isset($query_string['tag']) && $query_string['paged']){
+    global $wp_query;
+    $query_string['paged'] = qw_get_page_number($wp_query);
+  }
+  // fix categories
+  if (isset($query_string['page']) && isset($query_string['name']) && $query_string['name'] == 'page') {
+      unset($query_string['name']);
+      unset($query_string['page']);
+  }
+
+  return $query_string;
+}
+
+// http://codex.wordpress.org/Conditional_Tags
+function qw_get_page_op()
+{
+  global $wp_query;
+  $op = '';
+
+  // look for categories and tags in the query_vars
+  if (is_category() || !empty($wp_query->query_vars['category_name'])){
+    $op = 'category';
+  }
+  else if (is_tag() || !empty($wp_query->query_vars['tag'])){
+    $op = 'tag';
+  }
+  else if (is_tax() || !empty($wp_query->query_vars['taxonomy'])){
+    $op = 'tax';
+  }
+  else if (is_home()){
+    $op = 'home';
+  }
+  else if (is_single()){
+    // single is not pages
+    $op = 'single';
+  }
+  else if (is_page()){
+    $op = 'page';
+  }
+  else if (is_author()){
+    $op = 'author';
+  }
+  else if (is_search()){
+    $op = 'search';
+  }
+  else if (is_paged()){
+    $op = 'paged';
+  }
+  else if (is_404()){
+    $op = '404';
+  }
+  else {
+    $op = 'default';
+  }
+
+  // fix incorrectly identifying query pages as categories or tags
+  // depending on permalink structures
+  if($op == 'category' ||
+     $op == 'tag')
+  {
+    if ($wp_query->found_posts == 0){
+      $op = '404';
+    }
+  }
+  return $op;
+}
+
+/*
+ * Handle the qw path for pages
+ */
+function qw_get_path(){
+  global $wpdb;
+
+  $path = $_SERVER['REQUEST_URI'];
+  // Look at the requested uri w/o paginiation involved
+  $page_array = explode('/page/', $_SERVER['REQUEST_URI']);
+  if (isset($page_array[0])){
+    $path = $page_array[0];
+  }
+
+  // look for get variables
+  $get_array = explode('?', $path);
+  if (isset($get_array[0])){
+    $path = $get_array[0];
+  }
+
+  // Clean the result for DB
+  $path = $wpdb->escape(ltrim($path,'/'));
+
+  return $path;
+}
+
+/*
+ * Alter the toolbar edit menu
+ */
+function qw_before_admin_bar_render() {
+  global $wp_admin_bar, $wp_query;
+
+  if ($wp_query->query_wrangler['query_id']){
+    $edit_query = array(
+      'title' => 'Edit Query',
+      'href' => '/wp-admin/admin.php?page=query-wrangler&edit='.$wp_query->query_wrangler['query_id'],
+      'parent' => false, // false for a root menu, pass the ID value for a submenu of that menu.
+      'id' => 'edit', // defaults to a sanitized title value.
+      'meta' => false // array of any of the following options: array( 'html' => '', 'class' => '', 'onclick' => '', target => '', title => '' );
+    );
+
+    $wp_admin_bar->remove_menu('edit');
+    $wp_admin_bar->add_menu($edit_query);
+  }
+}
+
+/*
+ * Handle Query pages
+ * ref: http://www.blogseye.com/2010/05/creating-fake-wordpress-posts-on-the-fly/
+ */
+function qw_query_pages_handler()
+{
+  // don't override admin pages.... for now, whawhawha
+  if (is_admin()){
+    return;
+  }
+
+  global $wp_query,$wpdb;
+  $handled_ops = array('category', 'tag', 'tax', '404', 'single');
+
+  // page op is based on WP Conditional tags like is_category() && is_404()
+  $op = qw_get_page_op();
+
+  // we only handle sepcific types of pages and overrides
+  if(in_array($op, $handled_ops))
+  {
+    $qw_table = $wpdb->prefix."query_wrangler";
+    $qo_table = $wpdb->prefix."query_overrides";
+
+    // We'll need to override query options
+    $options_override = array();
+
+    // fix the query paging
+    if($paged = qw_get_page_number($wp_query)){
+      $wp_query->query_vars['paged'] = $paged;
+      $wp_query->query_vars['page'] = $paged;
+    }
+
+    /*
+     * 404 -> Query type = Page
+     */
+    if($op == '404'){
+      // Clean the result for DB
+      $path = qw_get_path();
+
+      // take into account trailing slash
+      if(substr($path, strlen($path)-1, 1) != '/'){
+        $alt_path = $path.'/';
+      } else {
+        $alt_path = substr($path, 0, strlen($path)-1);
+      }
+      // Look for the query path given
+      $sql = "SELECT id,name,path,data FROM ".$qw_table." WHERE type LIKE '%page%' AND (path = '".$path."' OR path = '".$alt_path."')";
+      $query = $wpdb->get_row($sql);
+    }
+
+    /*
+     * Category & Tag -> Query type = Override
+     */
+    // get query by contextual filter
+    $handlers = qw_all_handlers();
+    foreach ($handlers['contextual_filter']['all_items'] as $item){
+      // make sure the handler item can handle overrides
+      if (isset($item['query_override_id_callback'])){
+        // make sure the override_id was found in wp_query
+        if ($override_id = $item['query_override_id_callback']($item))
+        {
+          // get potential query
+          $sql = "SELECT qw.id, qw.data
+                  FROM ".$qw_table." as qw
+                  LEFT JOIN ".$qo_table." as qo ON qo.query_id = qw.id
+                  WHERE qo.override_id = '".$override_id."'
+                    AND qo.override_hook = '".$item['hook_key']."'
+                  LIMIT 1";
+          if ($query = $wpdb->get_row($sql)){
+            break;
+          }
+        }
+      }
+    }
+
+    // got results for a query
+    if (isset($query))
+    {
+      add_action( 'wp_before_admin_bar_render', 'qw_before_admin_bar_render' );
+
+$_SESSION['qw']['time']['page_load']['start'] = microtime(1);
+      // pass the paged value into the query
+      $options_override['args']['paged'] = $paged;
+      $options_override['display']['types']['this_instance'] = 'page';
+
+      // actual options
+      $options = qw_unserialize($query->data);
+      // resulting query
+      $themed_query = qw_execute_query($query->id, $options_override, false);
+      // post title
+      if($op == '404'){
+        // The title of the query
+        $post_title = ($options['display']['title']) ? $options['display']['title'] : $query->name;
+        // alter op to page for get_query_template()
+        $op = 'page';
+      }
+      else {
+        // categories and tags use term name for title
+        if ($term = qw_get_term($override_id)){
+          $post_title = $term->name;
+        }
+      }
+
+      // remove the autop filter to prevent paragraph randomly being added
+      remove_filter( 'the_content', 'wpautop' );
+
+      // Make the post object
+      $post = new stdClass();
+        $post->ID           = -42;  // Arbitrary post id
+        $post->post_title   = $post_title;
+        $post->post_content =  $themed_query;
+        $post->post_status  = 'publish';
+        $post->post_type    = 'page';
+        $post->post_category= array('uncategorized');
+        $post->post_excerpt = '';
+
+      // set some query information
+      $wp_query->queried_object = $post;
+      $wp_query->post           = $post;
+      $wp_query->found_posts    = true;
+      $wp_query->post_count     = true;
+      //$wp_query->max_num_pages = true;
+      $wp_query->is_single      = true;
+      $wp_query->is_posts_page  = true;
+      $wp_query->is_page        = true;
+      $wp_query->posts          = array($post);
+      $wp_query->is_404         = false;
+      $wp_query->is_post        = false;
+      $wp_query->is_home        = false;
+      $wp_query->is_archive     = false;
+      $wp_query->is_category    = false;
+
+$_SESSION['qw']['time']['page_load']['end'] = microtime(1);
+$_SESSION['qw']['time']['page_template']['start'] = microtime(1);
+      // According to http://codex.wordpress.org/Plugin_API/Action_Reference
+      // we can safely exit here. The template will take care of the rest.
+      // chosen template path
+      $template_path = TEMPLATEPATH."/".$options['display']['page']['template-file'];
+      if(!file_exists($template_path)) {
+      	 $template_path = get_query_template($op);
+      }
+
+      include($template_path);
+$_SESSION['qw']['time']['page_template']['end'] = microtime(1);
+//print qw_debug_query_time();
+      exit();
+    }
+  }
+}
