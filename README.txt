@@ -57,6 +57,10 @@ Select a category or multiple categories to override.   Save the query, then vis
 1. Tabs Editor Theme
 
 == Changelog ==
+= 1.5rc6 =
+
+ * Fix: WP update broke jquery and jquery ui. now relying on external sources
+ 
 = 1.5rc5 =
 
  * Fix: bug, javascript sometimes enqueuing in wrong order (Google Libraries)
@@ -131,4 +135,4 @@ Select a category or multiple categories to override.   Save the query, then vis
 
 == Upgrade Notice ==
 
-1.5rc5 Bug fixes
+1.5rc6 Critical UI fix
