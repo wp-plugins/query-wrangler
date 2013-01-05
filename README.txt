@@ -57,6 +57,11 @@ Select a category or multiple categories to override.   Save the query, then vis
 1. Tabs Editor Theme
 
 == Changelog ==
+
+= 1.5rc8 =
+
+ * Fix: Fixing sortable jquery ui issue.  QW UI working w/ WP 3.5
+ 
 = 1.5rc7 =
 
  * Fix: No longer relying on external jquery sources, working to fix views ui
@@ -139,4 +144,4 @@ Select a category or multiple categories to override.   Save the query, then vis
 
 == Upgrade Notice ==
 
-1.5rc7 Another attempt at Critical UI fix
+1.5rc8 Fixing sortable

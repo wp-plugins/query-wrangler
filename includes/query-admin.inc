@@ -260,6 +260,7 @@ function qw_admin_js(){
   wp_enqueue_script('jquery-ui-core', false, array('jquery'));
   wp_enqueue_script('jquery-ui-accordion');
   wp_enqueue_script('jquery-ui-dialog');
+  wp_enqueue_script('jquery-ui-sortable');
   wp_enqueue_script('qw-admin-js',
                   plugins_url('/js/query-wrangler.js', dirname(__FILE__)),
                   array('jquery-ui-core'),
