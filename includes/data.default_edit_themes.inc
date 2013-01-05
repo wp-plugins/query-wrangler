@@ -45,7 +45,7 @@ function qw_edit_theme_tabs_js(){
   wp_enqueue_script('qw-admin-theme-tabs',
                   plugins_url('/themes/tabs/query-wrangler-tabs.js', dirname(__FILE__)),
                   array(),
-                  QW_VERSION);
+                  QW_VERSION, true);
 }
 
 /*
@@ -67,5 +67,5 @@ function qw_edit_theme_views_js(){
   wp_enqueue_script('qw-edit-theme-views',
                   plugins_url('/themes/views/query-wrangler-views.js', dirname(__FILE__) ),
                   array(),
-                  QW_VERSION);
+                  QW_VERSION, true);
 }
