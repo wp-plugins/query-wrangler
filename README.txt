@@ -58,6 +58,10 @@ Select a category or multiple categories to override.   Save the query, then vis
 
 == Changelog ==
 
+= 1.5rc9 =
+
+ * Fix: Wordpress 3.7 update redirecting from custom pages
+
 = 1.5rc8 =
 
  * Fix: Fixing sortable jquery ui issue.  QW UI working w/ WP 3.5
@@ -144,4 +148,4 @@ Select a category or multiple categories to override.   Save the query, then vis
 
 == Upgrade Notice ==
 
-1.5rc8 Fixing sortable
+1.5rc9 Important! Critical bug fix for compatibility with Wordpress 3.7

@@ -98,6 +98,7 @@ add_action('wp', 'qw_query_pages_handler');
  */
 function qw_query_pages_handler()
 {
+	
   global $wp_query,$wpdb;
 
   // page op is based on WP tags like is_category() && is_404()
@@ -106,9 +107,10 @@ function qw_query_pages_handler()
   // we only handle sepcific types of pages and overrides
   if($op == 'category' ||
      $op == 'tag' ||
-     $op == '404')
+     $op == '404' ||
+		 $op == 'home')
   {
-
+		
     $qw_table = $wpdb->prefix."query_wrangler";
     $qot_table = $wpdb->prefix."query_override_terms";
 
@@ -127,7 +129,8 @@ function qw_query_pages_handler()
     /*
      * 404 -> Query type = Page
      */
-    if($op == '404')
+    if($op == '404' ||
+			 $op == 'home')
     {
       // include Template Wrangler
       if(!function_exists('theme')){
