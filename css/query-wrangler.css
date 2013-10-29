@@ -108,8 +108,11 @@ label.qw-field-checkbox input {
 #query-actions {
   float: right;
 }
-.qw-weight {
+.qw-weight-container {
   float: right;
+	clear: right;
+	margin-top: 16px;
+	display: none;
 }
 .qw-remove {
   float: right;

@@ -43,7 +43,7 @@ The easiest way is to add it as a custom link in the Menus section of your site.
 
 = How do I use query shortcodes? =
 
-Easy, the code you're looking for is like this.   [query id=2] , where the number 2 is the query id.
+Easy, the code you're looking for is like this.   [query id=2] , where the number 2 is the query id. This can be found on the Query Wrangler page eside each query.
 
 = What are overrides and how do I use them? =
 
@@ -58,6 +58,10 @@ Select a category or multiple categories to override.   Save the query, then vis
 
 == Changelog ==
 
+= 1.5rc10 =
+
+ * UI fixes and improvements.
+ 
 = 1.5rc9 =
 
  * Fix: Wordpress 3.7 update redirecting from custom pages
@@ -148,4 +152,4 @@ Select a category or multiple categories to override.   Save the query, then vis
 
 == Upgrade Notice ==
 
-1.5rc9 Important! Critical bug fix for compatibility with Wordpress 3.7
+1.5rc10 UI fixes and improvements

@@ -81,11 +81,11 @@ function qw_basic_posts_per_page($basic, $args)
 {
   ob_start();
   ?>
+    <p class="description"><?php print $basic['description']; ?></p>
     <input class="qw-text-short"
            type="text"
            name="<?php print $basic['form_prefix']; ?>[posts_per_page]"
            value="<?php print $args['posts_per_page']; ?>" />
-    <p class="description"><?php print $basic['description']; ?></p>
   <?php
   return ob_get_clean();
 }
@@ -93,11 +93,11 @@ function qw_basic_offset($basic, $args)
 {
   ob_start();
   ?>
+    <p class="description"><?php print $basic['description']; ?></p>
     <input class="qw-text-short"
            type="text"
            name="<?php print $basic['form_prefix']; ?>[offset]"
            value="<?php print $args['offset']; ?>" />
-    <p class="description"><?php print $basic['description']; ?></p>
   <?php
   return ob_get_clean();
 }
@@ -106,6 +106,7 @@ function qw_basic_display_style($basic, $display)
   $styles = qw_all_styles();
   ob_start();
   ?>
+    <p class="description"><?php print $basic['description']; ?></p>
     <select name="<?php print $basic['form_prefix']; ?>[style]"
             id="query-display-style">
       <?php
@@ -121,7 +122,6 @@ function qw_basic_display_style($basic, $display)
         }
       ?>
     </select>
-    <p class="description"><?php print $basic['description']; ?></p>
 
     <!-- style settings -->
     <div id="display-style-settings">
@@ -150,6 +150,7 @@ function qw_basic_display_row_style($basic, $display)
   $row_styles = qw_all_row_styles();
   ob_start();
   ?>
+    <p class="description"><?php print $basic['description']; ?></p>
     <select id="qw-display-type"
             name="<?php print $basic['form_prefix']; ?>[row_style]">
       <?php
@@ -163,9 +164,9 @@ function qw_basic_display_row_style($basic, $display)
         }
       ?>
     </select>
-    <p class="description"><?php print $basic['description']; ?></p>
 
     <!-- style settings -->
+    <p class="description">Some Row Styles have additional settings.</p>
     <div id="row-style-settings">
       <?php
         foreach($row_styles as $type => $row_style){
@@ -174,7 +175,7 @@ function qw_basic_display_row_style($basic, $display)
             $row_style['values'] = $display[$row_style['settings_key']];
             ?>
             <div id="tab-row-style-settings-<?php print $row_style['hook_key']; ?>" class="qw-query-content">
-              <span class="qw-setting-header"><?php print $row_style['title']; ?> Settings</span>
+              <h3 class="qw-setting-header"><?php print $row_style['title']; ?> Settings</h3>
               <div class="qw-setting-group">
                 <?php print $row_style['settings_callback']($row_style); ?>
               </div>
@@ -192,6 +193,7 @@ function qw_basic_post_status($basic, $args)
   $post_statuses = qw_all_post_statuses();
   ob_start();
   ?>
+    <p class="description"><?php print $basic['description']; ?></p>
     <select id="qw-post-status"
             name="<?php print $basic['form_prefix']; ?>[post_status]">
       <?php
@@ -205,7 +207,6 @@ function qw_basic_post_status($basic, $args)
         }
       ?>
     </select>
-    <p class="description"><?php print $basic['description']; ?></p>
   <?php
   return ob_get_clean();
 }
@@ -243,11 +244,11 @@ function qw_basic_wrapper_classes($basic, $display)
 {
   ob_start();
   ?>
+    <p class="description"><?php print $basic['description']; ?></p>
     <input class="qw-text-long"
            type="text"
            name="<?php print $basic['form_prefix']; ?>[wrapper-classes]"
            value="<?php print $display['wrapper-classes']; ?>" />
-    <p class="description"><?php print $basic['description']; ?></p>
   <?php
   return ob_get_clean();
 }
@@ -255,11 +256,11 @@ function qw_basic_display_title($basic, $display)
 {
   ob_start();
   ?>
+    <p class="description"><?php print $basic['description']; ?></p>
     <input class="qw-text-long"
            type="text"
            name="<?php print $basic['form_prefix']; ?>[title]"
            value="<?php print $display['title']; ?>" />
-    <p class="description"><?php print $basic['description']; ?></p>
   <?php
   return ob_get_clean();
 }

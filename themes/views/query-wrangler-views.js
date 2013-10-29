@@ -163,6 +163,7 @@ QueryWrangler.theme_accordions = function(){
   jQuery('#display-style-settings, #row-style-settings, .qw-sortable-list')
     .accordion({
       header: '> div > .qw-setting-header',
+			heightStyle: "content",
       collapsible: true,
       active: false,
       autoHeight: false
@@ -236,6 +237,10 @@ QueryWrangler.sortable_list_build = function(element){
   QueryWrangler.current_form_id = jQuery(element).closest('.qw-query-admin-options').attr('id');
 
   var output = '<ul id="'+QueryWrangler.current_form_id+'-sortable" class="qw-hidden">';
+	//http://stackoverflow.com/questions/8873946/jquery-ui-dialog-height
+	var wWidth = jQuery(window).width();
+	var wHeight = jQuery(window).height();
+
   jQuery('#'+QueryWrangler.current_form_id+'-list div').each(function(i, element){
     html = jQuery(element).wrap('<div>').parent().html();
     output+= '<li class="qw-sortable ui-helper-reset ui-state-default ui-corner-all">'+html+'</li>';
@@ -243,14 +248,16 @@ QueryWrangler.sortable_list_build = function(element){
   output+= '</ul>';
 
   jQuery(output).appendTo('#qw-options-forms');
-
   jQuery('#'+QueryWrangler.current_form_id+'-sortable')
     .sortable()
     .dialog({
       modal: true,
-      width: '60%',
-      height: 440,
+      width: (wWidth * 0.7),
+      height: (wHeight * 0.8),
       title: jQuery(element).text(),
+			open: function() {
+				jQuery(this).dialog("option", "position", "center");
+			},
       close: function() {
         QueryWrangler.sortable_list_destroy(this);
       },
@@ -281,14 +288,14 @@ QueryWrangler.sortable_list_update = function(dialog){
   var items = jQuery(dialog).children('.qw-sortable');
   jQuery(items).each(function(i, item){
     // repopulate list
-    jQuery('#'+list_id).append('<div>'+jQuery(item).html()+'</div>');
+    jQuery('#'+list_id).append('<div class="qw-modified">'+jQuery(item).html()+'</div>');
 
     // update weight
     var form_id = jQuery(item).children('.qw-query-title').attr('title');
     // kitchen sink
     jQuery('#'+form_id).find('.qw-weight').val(i).attr('value', i);
   });
-
+	jQuery('.qw-changes').show();
   //QueryWrangler.sortable_list_update_weights(list_id);
 }
 QueryWrangler.sortable_list_update_weights = function(list_id){
@@ -325,12 +332,17 @@ jQuery(document).ready(function(){
 
     QueryWrangler.current_form_id = jQuery(this).attr('title');
     var dialog_title = jQuery(this).text().split(':');
-
+		var wWidth = jQuery(window).width();
+		var wHeight = jQuery(window).height();
+		
     jQuery('#'+QueryWrangler.current_form_id).dialog({
       modal: true,
-      width: '60%',
-      height: 440,
+      width: (wWidth * 0.7),
+      height: (wHeight * 0.8),
       title: dialog_title[0],
+			open: function() {
+				jQuery(this).dialog("option", "position", "center");
+			},			
       resizable: false,
       close: function() {
         QueryWrangler.restore_form(this);

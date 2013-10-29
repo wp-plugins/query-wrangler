@@ -68,6 +68,7 @@ jQuery(document).ready(function(){
   // accordions
   jQuery('#query-details').accordion({
       header: '> div > .qw-setting-header',
+			heightStyle: "content",
       collapsible: true,
       active: false,
       autoHeight: false

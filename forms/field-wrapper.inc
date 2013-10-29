@@ -32,10 +32,13 @@
     <div class="qw-remove button">
       Remove
     </div>
-    <input class='qw-weight'
+    <div class="qw-weight-container">
+			Weight: 
+			<input class='qw-weight'
            name='qw-query-options[display][field_settings][fields][<?php print $field['name']; ?>][weight]'
            type='text' size='2'
            value='<?php print $weight; ?>' />
+		</div>
 
     <p class="description"><?php print $field['description']; ?></p>
 

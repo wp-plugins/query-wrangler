@@ -29,7 +29,7 @@ $display = array_map( 'stripslashes_deep', $display );
 <!-- left column -->
     <div class="qw-query-admin-column">
       <div id="qw-query-args" class="qw-query-admin-options">
-        <h4>Basic settings</h4>
+        <h4>Basic Settings</h4>
         <?php
           $basics = qw_all_basic_settings();
           foreach($basics as $basic)
@@ -37,7 +37,7 @@ $display = array_map( 'stripslashes_deep', $display );
             if(isset($basic['form_callback']) && function_exists($basic['form_callback']))
             { ?>
               <div class="qw-query-title" title="qw-<?php print $basic['hook_key']; ?>">
-                <?php print $basic['title']; ?>
+                <span class="qw-setting-title"><?php print $basic['title']; ?></span>
                 :
                 <span class="qw-setting-value">
                   <?php
@@ -69,7 +69,8 @@ $display = array_map( 'stripslashes_deep', $display );
               if($query_type == 'page')
               { ?>
                 <div class="qw-query-title" title="qw-page-path">
-                  Page Path:
+                  <span class="qw-setting-title">Page Path</span>
+									:
                   <span class="qw-setting-value">
                     <?php print ($query_page_path) ? $query_page_path : 'None'; ?>
                   </span>
@@ -78,14 +79,16 @@ $display = array_map( 'stripslashes_deep', $display );
               }
             ?>
             <div class="qw-query-title" title="qw-page-template">
-              Page Template:
+              <span class="qw-setting-title">Page Template</span>
+							:
               <span class="qw-setting-value">
                 <?php print ($display['page']['template-name']) ? $display['page']['template-name'] : 'Default'; ?>
               </span>
             </div>
 
             <div class="qw-query-title" title="qw-page-pager">
-              Pager:
+              <span class="qw-setting-title">Pager</span>
+							:
               <span class="qw-setting-value">
                 <?php print ($pager_types[$display['page']['pager']['type']]['title']) ? $pager_types[$display['page']['pager']['type']]['title'] : 'Default'; ?>
               </span>
@@ -127,15 +130,17 @@ $display = array_map( 'stripslashes_deep', $display );
       ?>
 
       <div id="qw-query-fields" class="qw-query-admin-options">
-        <h4>Fields</h4>
         <div class="qw-query-add-titles">
-          <span class="qw-query-title" title="qw-display-add-fields">
-            Add Fields
-          </span>
           <span class="qw-rearrange-title" title="qw-sort-fields">
-            Rearrange Fields
+            Rearrange
+          </span>
+          <span class="qw-query-title" title="qw-display-add-fields">
+            Add
           </span>
         </div>
+				
+				<h4>Fields</h4>
+				
         <div class="qw-clear-gone"><!-- ie hack -->&nbsp;</div>
 
         <div id="qw-query-fields-list">
@@ -164,15 +169,15 @@ $display = array_map( 'stripslashes_deep', $display );
     <div class="qw-query-admin-column">
     <!-- sorts -->
       <div id="qw-query-sorts" class="qw-query-admin-options">
-        <h4>Sort Options</h4>
         <div class="qw-query-add-titles">
-          <span class="qw-query-title" title="qw-display-add-sorts">
-            Add Sort Options
-          </span>
           <span class="qw-rearrange-title" title="qw-sort-sorts">
-            Rearrange Sort Options
+            Rearrange
+          </span>
+          <span class="qw-query-title" title="qw-display-add-sorts">
+            Add
           </span>
         </div>
+        <h4>Sort Options</h4>
         <div class="qw-clear-gone"><!-- ie hack -->&nbsp;</div>
         <div id="qw-query-sorts-list">
           <?php
@@ -195,15 +200,15 @@ $display = array_map( 'stripslashes_deep', $display );
 
     <!-- filters -->
       <div id="qw-query-filters" class="qw-query-admin-options">
-        <h4>Filters</h4>
         <div class="qw-query-add-titles">
-          <span class="qw-query-title" title="qw-display-add-filters">
-            Add Filters
-          </span>
           <span class="qw-rearrange-title" title="qw-sort-filters">
-            Rearrange Filters
+            Rearrange
+          </span>
+          <span class="qw-query-title" title="qw-display-add-filters">
+            Add
           </span>
         </div>
+        <h4>Filters</h4>
         <div class="qw-clear-gone"><!-- ie hack -->&nbsp;</div>
 
         <div id="qw-query-filters-list">
