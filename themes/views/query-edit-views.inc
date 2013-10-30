@@ -479,7 +479,7 @@ $display = array_map( 'stripslashes_deep', $display );
               foreach($all_filters as $hook_key => $filter)
               {
                 // for now, this is how I'll prevent certain filters on overrides
-                if(in_array($query_type, $filter['query_display_types']))
+                if(isset($filter['query_display_types']) && is_array($filter['query_display_types']) && in_array($query_type, $filter['query_display_types']))
                 { ?>
                   <label class="qw-filter-checkbox">
                     <input type="checkbox"

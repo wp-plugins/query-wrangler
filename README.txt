@@ -58,6 +58,10 @@ Select a category or multiple categories to override.   Save the query, then vis
 
 == Changelog ==
 
+= 1.5rc11 =
+ 
+ * Chasing WP 3.7 related bugs
+
 = 1.5rc10 =
 
  * UI fixes and improvements.
@@ -152,4 +156,4 @@ Select a category or multiple categories to override.   Save the query, then vis
 
 == Upgrade Notice ==
 
-1.5rc10 UI fixes and improvements
+1.5rc11 Attempted bug fixes

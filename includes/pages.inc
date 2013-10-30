@@ -34,6 +34,9 @@ function qw_get_page_op()
   else if (is_tag() || !empty($wp_query->query_vars['tag'])){
     $op = 'tag';
   }
+  else if (is_404()){
+    $op = '404';
+  }
   else if (is_home()){
     $op = 'home';
   }
@@ -52,9 +55,6 @@ function qw_get_page_op()
   }
   else if (is_paged()){
     $op = 'paged';
-  }
-  else if (is_404()){
-    $op = '404';
   }
   else {
     $op = 'default';
@@ -98,7 +98,6 @@ add_action('wp', 'qw_query_pages_handler');
  */
 function qw_query_pages_handler()
 {
-	
   global $wp_query,$wpdb;
 
   // page op is based on WP tags like is_category() && is_404()
@@ -220,8 +219,8 @@ function qw_query_pages_handler()
       }
 
       // remove the autop filter to prevent paragraph randomly being added
-      remove_filter( 'the_content', 'wpautop' );
-
+      //remove_filter( 'the_content', 'wpautop' );
+      
       // Make the post object
       $post = new stdClass();
         $post->ID           = -42;  // Arbitrary post id
