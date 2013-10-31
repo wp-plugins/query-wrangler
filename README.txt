@@ -58,6 +58,10 @@ Select a category or multiple categories to override.   Save the query, then vis
 
 == Changelog ==
 
+= 1.5rc12 =
+ 
+ * New page routing with hook parse_request
+
 = 1.5rc11 =
  
  * Chasing WP 3.7 related bugs
@@ -156,4 +160,4 @@ Select a category or multiple categories to override.   Save the query, then vis
 
 == Upgrade Notice ==
 
-1.5rc11 Attempted bug fixes
+1.5rc12 Better fix for page route handling
