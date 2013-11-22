@@ -35,7 +35,7 @@ function theme($template_name = '', $arguments = array())
     $theme_folder = array_pop($theme_folder);
 
     // if not arguments array given, make empty array for future actions
-    if(!is_array($template['arguments'])){
+    if(!isset($template['arguments']) || !is_array($template['arguments'])){
       $template['arguments'] = array();
     }
 

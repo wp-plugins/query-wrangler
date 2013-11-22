@@ -11,8 +11,7 @@ function qw_execute_query($query_id, $options_override = array(), $reset_post_da
 {
   global $wp_query;
   // backup the old query
-  $old_query = $wp_query;
-
+  $old_query = clone $wp_query;
 
   // get the query options
   $options = qw_generate_query_options($query_id, $options_override);
@@ -20,13 +19,13 @@ function qw_execute_query($query_id, $options_override = array(), $reset_post_da
   // get formatted query arguments
   $args = qw_generate_query_args($options);
 
-// pre_query hook
+  // pre_query hook
   do_action_ref_array('qw_pre_query', array(&$args));
 
   // set the new query
   $wp_query = new WP_Query($args);
 
-// pre_render hook
+  // pre_render hook
   do_action_ref_array('qw_pre_render', array(&$options));
 
   // get the themed content
@@ -79,7 +78,7 @@ function qw_generate_query_options($query_id, $options_override = array(), $full
   $options['meta']['slug'] = $rows[0]->slug;
   $options['meta']['name'] = $rows[0]->name;
   $options['meta']['type'] = $rows[0]->type;
-  $options['meta']['pagination'] = (isset($options['args']['paged'])) ? true : false;
+  $options['meta']['pagination'] = (isset($options['display']['page']['pager']['active'])) ? 1 : 0;
   $options['meta']['header'] = $options['display']['header'];
   $options['meta']['footer'] = $options['display']['footer'];
   $options['meta']['empty'] = $options['display']['empty'];
@@ -100,11 +99,11 @@ function qw_generate_query_args($options = array(), $options_override = array())
   $all_sorts = qw_all_sort_options();
 
   // standard arguments
+  $args['paged'] = qw_get_page_number();  
   $args['posts_per_page'] = ($options['args']['posts_per_page']) ? $options['args']['posts_per_page']: 5;
   $args['offset']         = ($options['args']['offset']) ? $options['args']['offset']: 0;
   //$args['orderby']        = ($options['args']['orderby']) ? $options['args']['orderby']: 'none';
   //$args['order']          = ($options['args']['order']) ? $options['args']['order']: 'ASC';
-  $args['paged']          = $options['args']['paged'];
   $args['post_status']    = $options['args']['post_status'];
 
   // handle sorts
@@ -210,16 +209,16 @@ function qw_get_all_pages()
  * @return
  *    int - the currentpage number
  */
-function qw_get_page_number(&$wp_query){
+function qw_get_page_number($wp_query = NULL){
   // help figure out the current page
   $path_array = explode('/page/', $_SERVER['REQUEST_URI']);
 
   // look for WP paging first
-  if ($wp_query->query_vars['paged']){
+  if (!is_null($wp_query) && isset($wp_query->query_vars['paged'])){
     $page = $wp_query->query_vars['paged'];
   }
   // try wordpress method
-  else if (get_query_var('paged')){
+  else if (!is_null($wp_query) && get_query_var('paged')){
     $page = get_query_var('paged');
   }
   // paging with slashes
@@ -301,8 +300,8 @@ function qw_serialize($array){
  * Custom: Fix unserialize problem with quotation marks
  */
 function qw_unserialize($serial_str) {
-  $serial_str= preg_replace('!s:(\d+):"(.*?)";!se', "'s:'.strlen('$2').':\"$2\";'", $serial_str );
-  $serial_str= str_replace("\r", "", $serial_str);
+  $serial_str= preg_replace('!s:(\d+):"(.*?)";!se', "'s:'.strlen('$2').':\"$2\";'", $serial_str ); 
+  //$serial_str= str_replace("\r", "", $serial_str);
   //$serial_str= str_replace("\n", "", $serial_str);
   $array = array();
   $array = unserialize($serial_str);

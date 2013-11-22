@@ -179,6 +179,26 @@ function theme_query_display_rows_preprocess($template)
   }
   return $template;
 }
+
+/*
+ * Preprocess query_display_syle to allow field styles to define their own default path
+ */
+function theme_query_display_style_preprocess($template)
+{
+  $all_styles = qw_all_styles();
+  // make sure we know what style to use
+  if(isset($all_styles[$template['arguments']['style']]))
+  {
+    // get the specific style
+    $style = $all_styles[$template['arguments']['style']];
+    // set this template's default path to the style's default path
+    if (!empty($style['default_path'])){
+      $template['default_path'] = $style['default_path'];
+    }
+  }
+  return $template;
+}
+
 /*
  * Template the entire query
  *
@@ -249,9 +269,9 @@ function qw_template_query(&$wp_query, $options)
   if($options['meta']['footer'] != '') {
     $wrapper_args['footer'] = $options['meta']['footer'];
   }
-
+  
   // pagination
-  if($options['meta']['pagination'] && isset($options['display']['page']['pager']['active'])){
+  if($options['meta']['pagination'] && isset($options['display']['page']['pager']['active'])){   
     $pager_classes = array();
     $pager_classes[] = 'query-pager';
     $pager_classes[] = 'pager-'.$options['display']['page']['pager']['type'];

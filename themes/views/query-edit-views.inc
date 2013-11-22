@@ -41,7 +41,7 @@ $display = array_map( 'stripslashes_deep', $display );
                 :
                 <span class="qw-setting-value">
                   <?php
-                    if ($options[$basic['option_type']][$basic['hook_key']]){
+                    if (isset($options[$basic['option_type']][$basic['hook_key']])){
                       print $options[$basic['option_type']][$basic['hook_key']];
                     }
                     else {
@@ -56,27 +56,25 @@ $display = array_map( 'stripslashes_deep', $display );
         ?>
       </div> <!-- /qw-query-args -->
 
-      <?php
-        // use pager on pages and overrides
-        if($query_type == 'page' || $query_type == 'override')
-        { ?>
-          <div class="qw-clear-gone"><!-- ie hack -->&nbsp;</div>
-          <div id="qw-page-settings" class="qw-query-admin-options">
-            <h4>Page Settings</h4>
-
-            <?php
-              // path for pages only
-              if($query_type == 'page')
-              { ?>
-                <div class="qw-query-title" title="qw-page-path">
-                  <span class="qw-setting-title">Page Path</span>
-									:
-                  <span class="qw-setting-value">
-                    <?php print ($query_page_path) ? $query_page_path : 'None'; ?>
-                  </span>
-                </div>
-                <?php
-              }
+      <div class="qw-clear-gone"><!-- ie hack -->&nbsp;</div>
+      <div id="qw-page-settings" class="qw-query-admin-options">
+        <h4>Page Settings</h4>
+        <?php
+          // use pager on pages and overrides
+          if($query_type == 'page' || $query_type == 'override')
+          { 
+            // path for pages only
+            if($query_type == 'page')
+            { ?>
+              <div class="qw-query-title" title="qw-page-path">
+                <span class="qw-setting-title">Page Path</span>
+                :
+                <span class="qw-setting-value">
+                  <?php print ($query_page_path) ? $query_page_path : 'None'; ?>
+                </span>
+              </div>
+              <?php
+            }
             ?>
             <div class="qw-query-title" title="qw-page-template">
               <span class="qw-setting-title">Page Template</span>
@@ -85,19 +83,18 @@ $display = array_map( 'stripslashes_deep', $display );
                 <?php print ($display['page']['template-name']) ? $display['page']['template-name'] : 'Default'; ?>
               </span>
             </div>
-
-            <div class="qw-query-title" title="qw-page-pager">
-              <span class="qw-setting-title">Pager</span>
-							:
-              <span class="qw-setting-value">
-                <?php print ($pager_types[$display['page']['pager']['type']]['title']) ? $pager_types[$display['page']['pager']['type']]['title'] : 'Default'; ?>
-              </span>
-            </div>
-          </div>
-          <!-- /page settings -->
-          <?php
-        }
-      ?>
+            <?php
+          }
+        ?>
+        <div class="qw-query-title" title="qw-page-pager">
+          <span class="qw-setting-title">Pager</span>
+          :
+          <span class="qw-setting-value">
+            <?php print ($pager_types[$display['page']['pager']['type']]['title']) ? $pager_types[$display['page']['pager']['type']]['title'] : 'Default'; ?>
+          </span>
+        </div>
+      </div>
+      <!-- /page settings -->
     </div>
     <!-- /column -->
 
@@ -263,6 +260,52 @@ $display = array_map( 'stripslashes_deep', $display );
       ?>
 
 <!-- Page Settings -->
+
+        <!-- pager -->
+        <div id="qw-page-pager" class="qw-item-form">
+          <p>
+            Select which type of pager to use.
+          </p>
+          <label class='qw-field-checkbox'>
+            <?php
+              $use_pager = ($display['page']['pager']['active']) ? 'checked="checked"': '';
+            ?>
+            <input type='checkbox'
+                   name="qw-query-options[display][page][pager][active]"
+                   <?php print $use_pager;?> />
+            Use Pagination
+          </label>
+
+          <select name="qw-query-options[display][page][pager][type]">
+            <?php
+              foreach($pager_types as $pager_name => $pager_options)
+              {
+                $selected = ($display['page']['pager']['type'] == $pager_name) ? 'selected="selected"' : '';
+                ?>
+                <option value="<?php echo $pager_name; ?>"
+                        <?php echo $selected; ?>>
+                  <?php echo $pager_options['title']; ?>
+                </option>
+                <?php
+              }
+            ?>
+          </select>
+          <p>
+            Use the following options to change the Default Pager labels.
+          </p>
+          <strong>Previous Page Label:</strong>
+          <p>
+            <input type="text"
+                   name="qw-query-options[display][page][pager][previous]"
+                   value="<?php print $display['page']['pager']['previous']; ?>" />
+          </p>
+          <strong>Next Page Label:</strong>
+          <p>
+            <input type="text"
+                   name="qw-query-options[display][page][pager][next]"
+                   value="<?php print $display['page']['pager']['next']; ?>" />
+          </p>
+        </div>
         <?php
           // use template & pager on pages and overrides
           if($query_type == "page" || $query_type == "override")
@@ -285,52 +328,6 @@ $display = array_map( 'stripslashes_deep', $display );
                   }
                 ?>
               </select>
-            </div>
-
-            <!-- pager -->
-            <div id="qw-page-pager" class="qw-item-form">
-              <p>
-                Select which type of pager to use.
-              </p>
-              <label class='qw-field-checkbox'>
-                <?php
-                  $use_pager = ($display['page']['pager']['active']) ? 'checked="checked"': '';
-                ?>
-                <input type='checkbox'
-                       name="qw-query-options[display][page][pager][active]"
-                       <?php print $use_pager;?> />
-                Use Pagination
-              </label>
-
-              <select name="qw-query-options[display][page][pager][type]">
-                <?php
-                  foreach($pager_types as $pager_name => $pager_options)
-                  {
-                    $selected = ($display['page']['pager']['type'] == $pager_name) ? 'selected="selected"' : '';
-                    ?>
-                    <option value="<?php echo $pager_name; ?>"
-                            <?php echo $selected; ?>>
-                      <?php echo $pager_options['title']; ?>
-                    </option>
-                    <?php
-                  }
-                ?>
-              </select>
-              <p>
-                Use the following options to change the Default Pager labels.
-              </p>
-              <strong>Previous Page Label:</strong>
-              <p>
-                <input type="text"
-                       name="qw-query-options[display][page][pager][previous]"
-                       value="<?php print $display['page']['pager']['previous']; ?>" />
-              </p>
-              <strong>Next Page Label:</strong>
-              <p>
-                <input type="text"
-                       name="qw-query-options[display][page][pager][next]"
-                       value="<?php print $display['page']['pager']['next']; ?>" />
-              </p>
             </div>
             <?php
           }
@@ -580,6 +577,12 @@ $display = array_map( 'stripslashes_deep', $display );
         <div class="qw-setting-header">WP_Query Arguments</div>
         <div id="qw-show-arguments-target">
           <!-- args -->
+        </div>
+      </div>
+      <div class="group">
+        <div class="qw-setting-header">PHP WP_Query</div>
+        <div id="qw-show-php_wpquery-target">
+          <!-- php wp_query -->
         </div>
       </div>
       <div class="group">
