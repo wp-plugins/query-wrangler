@@ -9,7 +9,7 @@ Plugin URI:        http://www.widgetwrangler.com/query-wrangler
 Description:       Query Wrangler provides an intuitive interface for creating complex WP queries as pages or widgets. Based on Drupal Views.
 Author:            Jonathan Daggerhart, Forrest Livengood
 Author URI:        http://www.websmiths.co
-Version:           1.5rc12
+Version:           1.5rc14
 
 ******************************************************************
 
@@ -73,7 +73,7 @@ function qw_init(){
     add_action( 'wp_ajax_qw_form_ajax', 'qw_form_ajax' );
 
     // js
-    if($_GET['page'] == 'query-wrangler')
+    if(isset($_GET['page']) && $_GET['page'] == 'query-wrangler')
     {
       // edit page & not on export page
       if(!empty($_GET['edit']) &&
@@ -128,19 +128,7 @@ function qw_single_query_shortcode($atts) {
   $short_array = shortcode_atts(array('id' => ''), $atts);
   extract($short_array);
 
-  // get the query options
-  $options = qw_generate_query_options($id);
-
-  // get formatted query arguments
-  $args = qw_generate_query_args($options);
-
-  // set the new query
-  $wp_query = new WP_Query($args);
-
-  // get the themed content
-  $themed = qw_template_query($wp_query, $options);
-  // reset because worpress hates programmers
-  wp_reset_postdata();
+  $themed = qw_execute_query($id);
   return $themed;
 }
 add_shortcode('query','qw_single_query_shortcode');
@@ -180,3 +168,8 @@ function qw_query_override_terms_table(){
   dbDelta($sql);
 }
 register_activation_hook(__FILE__,'qw_query_override_terms_table');
+/*/
+function _d($v){
+  print '<hr/><pre>'.print_r($v,1).'</pre>';
+}
+// */

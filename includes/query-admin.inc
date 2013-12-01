@@ -173,6 +173,54 @@ function qw_query_import($post){
  * @return array Default query settings
  */
 function qw_default_query_data(){
+  return array (
+      'display' => array (
+        'title' => '',
+        'style' => 'unformatted',
+        'row_style' => 'posts',
+        'post_settings' => array (
+          'size' => 'complete',
+        ),
+        'header' => '',
+        'footer' => '',
+        'empty' => '',
+        'wrapper-classes' => '',
+        'page' => array (
+          'pager' => array (
+            'type' => 'default',
+            'previous' => '',
+            'next' => '',
+          ),
+        ),
+      ),
+      'args' => array (
+        'posts_per_page' => '5',
+        'offset' => 0,
+        'post_status' => 'publish',
+        'filters' => array (
+          'post_types' => array (
+            'type' => 'post_types',
+            'hook_key' => 'post_types',
+            'name' => 'post_types',
+            'weight' => '0',
+            'post_types' => 
+            array (
+              'post' => 'post',
+            ),
+          ),
+        ),
+        'sorts' => array (
+          'date' => array (
+            'type' => 'date',
+            'hook_key' => 'post_date',
+            'name' => 'date',
+            'weight' => '0',
+            'order_value' => 'DESC',
+          ),
+        ),
+      ),
+    );  
+/*  
   return array(
     'args' => array(
       'posts_per_page'  => 5,
@@ -190,6 +238,7 @@ function qw_default_query_data(){
       ),
     ),
   );
+*/  
 }
 /*
  * Slug creation
@@ -281,7 +330,7 @@ function qw_edit_json(){
     'allFields' => qw_all_fields(),
     'allStyles' => qw_all_styles(),
     'allRowStyles' => qw_all_row_styles(),
-    'allPostTypes' => qw_all_post_types,
+    'allPostTypes' => qw_all_post_types(),
     'allPagerTypes' => qw_all_pager_types(),
     'allImageSizes' => get_intermediate_image_sizes(),
     'allFileStyles' => qw_all_file_styles(),

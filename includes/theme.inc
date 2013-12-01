@@ -179,19 +179,39 @@ function theme_query_display_rows_preprocess($template)
   }
   return $template;
 }
+
+/*
+ * Preprocess query_display_syle to allow field styles to define their own default path
+ */
+function theme_query_display_style_preprocess($template)
+{
+  $all_styles = qw_all_styles();
+  // make sure we know what style to use
+  if(isset($all_styles[$template['arguments']['style']]))
+  {
+    // get the specific style
+    $style = $all_styles[$template['arguments']['style']];
+    // set this template's default path to the style's default path
+    if (!empty($style['default_path'])){
+      $template['default_path'] = $style['default_path'];
+    }
+  }
+  return $template;
+}
+
 /*
  * Template the entire query
  *
  * @param object
- *   $wp_query Wordpress query object
+ *   $qw_query Wordpress query object
  * @param array
  *   $options the query options
  *
  * @return string HTML for themed/templated query
  */
-function qw_template_query(&$wp_query, $options)
+function qw_template_query(&$qw_query, $options)
 {
-  $results_count = count($wp_query->posts);
+  $results_count = count($qw_query->posts);
   $content = '';
 
   // start building theme arguments
@@ -217,11 +237,11 @@ function qw_template_query(&$wp_query, $options)
 
     // the content of the widget is the result of the query
     if($options['display']['row_style'] == "posts") {
-      $template_args['rows'] = qw_make_posts_rows($wp_query, $options);
+      $template_args['rows'] = qw_make_posts_rows($qw_query, $options);
     }
       // setup row template arguments
     else if ($options['display']['row_style'] == "fields"){
-      $template_args['rows'] = qw_make_fields_rows($wp_query, $options);
+      $template_args['rows'] = qw_make_fields_rows($qw_query, $options);
     }
 
     // template the query rows
@@ -249,15 +269,15 @@ function qw_template_query(&$wp_query, $options)
   if($options['meta']['footer'] != '') {
     $wrapper_args['footer'] = $options['meta']['footer'];
   }
-
+  
   // pagination
-  if($options['meta']['pagination'] && isset($options['display']['page']['pager']['active'])){
+  if($options['meta']['pagination'] && isset($options['display']['page']['pager']['active'])){   
     $pager_classes = array();
     $pager_classes[] = 'query-pager';
     $pager_classes[] = 'pager-'.$options['display']['page']['pager']['type'];
     $wrapper_args['pager_classes'] = implode(" ", $pager_classes);
     // pager
-    $wrapper_args['pager'] = qw_make_pager($options['display']['page']['pager'], $wp_query);
+    $wrapper_args['pager'] = qw_make_pager($options['display']['page']['pager'], $qw_query);
   }
 
   // template with wrapper
@@ -266,12 +286,12 @@ function qw_template_query(&$wp_query, $options)
 /*
  *
  */
-function qw_make_posts_rows(&$wp_query, $options){
+function qw_make_posts_rows(&$qw_query, $options){
   $rows = array();
   $i = 0;
-  while($wp_query->have_posts())
+  while($qw_query->have_posts())
   {
-    $wp_query->the_post();
+    $qw_query->the_post();
     $template_args = array(
       'template' => 'query-'.$options['display']['post_settings']['size'],
       'slug' => $options['meta']['slug'],
@@ -302,7 +322,7 @@ function qw_row_classes($i){
  * @param array $display Query display data
  * @return array Executed query rows
  */
-function qw_make_fields_rows(&$wp_query, $options)
+function qw_make_fields_rows(&$qw_query, $options)
 {
   $display = $options['display'];
   $all_fields = qw_all_fields();
@@ -311,11 +331,11 @@ function qw_make_fields_rows(&$wp_query, $options)
 
   // loop through each post
   $i = 0;
-  while($wp_query->have_posts())
+  while($qw_query->have_posts())
   {
-    $wp_query->the_post();
+    $qw_query->the_post();
     //
-    $this_post = $wp_query->post;
+    $this_post = $qw_query->post;
     $rows[$i] = array();
 
     // make row classes
@@ -404,10 +424,10 @@ function qw_make_fields_rows(&$wp_query, $options)
  * Custom Pager function
  *
  * @param array $pager Query pager details
- * @param object $wp_query Object
+ * @param object $qw_query Object
  * @return HTML processed pager
  */
-function qw_make_pager($pager, &$wp_query)
+function qw_make_pager($pager, &$qw_query)
 {
   $pager_themed = '';
   $pagers = qw_all_pager_types();
@@ -420,7 +440,7 @@ function qw_make_pager($pager, &$wp_query)
   }
 
   // execute callback
-  $pager_themed = call_user_func_array($callback, array($pager, $wp_query));
+  $pager_themed = call_user_func_array($callback, array($pager, $qw_query));
 
   return $pager_themed;
 }
@@ -428,9 +448,9 @@ function qw_make_pager($pager, &$wp_query)
  * Custom Default Pager
  *
  * @param array $pager Query options for pager
- * @param object $wp_query Object
+ * @param object $qw_query Object
  */
-function qw_theme_pager_default($pager, &$wp_query)
+function qw_theme_pager_default($pager, &$qw_query)
 {
   // help figure out the current page
   $path_array = explode('/page/', $_SERVER['REQUEST_URI']);
@@ -439,7 +459,7 @@ function qw_theme_pager_default($pager, &$wp_query)
   $pager['next'] = ($pager['next']) ? $pager['next'] : 'Next Page &raquo;';
   $pager['previous'] = ($pager['previous']) ? $pager['previous'] : '&laquo; Previous Page';
 
-  if($page = qw_get_page_number($wp_query))
+  if($page = qw_get_page_number($qw_query))
   {
     $wpurl = get_bloginfo('wpurl');
 
@@ -458,7 +478,7 @@ function qw_theme_pager_default($pager, &$wp_query)
     }
 
     // next link
-    if(($page+1) <= $wp_query->max_num_pages){
+    if(($page+1) <= $qw_query->max_num_pages){
       $pager_themed.= '<div class="query-nextpage">
                         <a href="'.$wpurl.$path_array[0].'/page/'.($page+1).'">'.$pager['next'].'</a>
                       </div>';
@@ -471,18 +491,18 @@ function qw_theme_pager_default($pager, &$wp_query)
  * Default Pager with page numbers
  *
  * @param array $pager Query options for pager
- * @param object $wp_query Object
+ * @param object $qw_query Object
  *
  * @return string HTML for pager
  */
-function qw_theme_pager_numbers($pager, $wp_query)
+function qw_theme_pager_numbers($pager, $qw_query)
 {
-		$big = intval($wp_query->found_posts.'000');
+		$big = intval($qw_query->found_posts.'000');
 		$args = array(
     'base' => str_replace( $big, '%#%', get_pagenum_link( $big ) ),
     'format' => '?paged=%#%',
     'current' => max( 1, get_query_var('paged') ),
-    'total' => $wp_query->max_num_pages
+    'total' => $qw_query->max_num_pages
 		);
   $pager_themed = paginate_links($args);
   return $pager_themed;

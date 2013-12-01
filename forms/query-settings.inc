@@ -3,7 +3,6 @@
 
 <div id="qw-settings-page" class="ui-corner-all">
   <div class="qw-setting">
-
     <label class="qw-label">Editor Theme:</label>
     <select name="qw-theme">
       <?php
@@ -20,5 +19,16 @@
     </select>
     <p class="description">Choose the Query Wrangler editor theme.</p>
   </div>
+  
+  <div class="qw-setting">
+    <div>
+      <label>
+        <input type="checkbox" name="qw-widget-theme-compat" <?php print ($widget_theme_compat == "on") ? "checked='checked'" : ""; ?> />
+        <strong>Widget Theme Compatibility</strong>
+      </label>
+    </div>
+    <p class="description">If you're having trouble with the way Qyery Wrangler Widgets appear in your sidebar, select this option.</p>
+  </div>
+  
 </div>
 </form>

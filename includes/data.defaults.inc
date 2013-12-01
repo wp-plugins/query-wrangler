@@ -69,6 +69,7 @@ function qw_default_row_styles($row_styles){
   $row_styles['posts'] = array(
     'title' => 'Posts',
     'settings_callback' => 'qw_row_style_posts_settings',
+    'settings_key' => 'post',
   );
   $row_styles['fields'] = array(
     'title' => 'Fields',
@@ -78,7 +79,7 @@ function qw_default_row_styles($row_styles){
 // add default field styles to the filter
 add_filter('qw_row_styles', 'qw_default_row_styles', 0);
 
-function qw_row_style_posts_settings()
+function qw_row_style_posts_settings($row_style)
 {
   ob_start();
   ?>
@@ -86,11 +87,11 @@ function qw_row_style_posts_settings()
     <select class="qw-title-ignore"
             name="qw-query-options[display][post_settings][size]">
       <option value="complete"
-              <?php if($display['post_settings']['size'] == "complete") { print 'selected="selected"';} ?>>
+              <?php if(isset($row_style['values']['size']) && $row_style['values']['size'] == "complete") { print 'selected="selected"';} ?>>
         Complete Post
       </option>
       <option value="excerpt"
-              <?php if($display['post_settings']['size'] == "excerpt") { print 'selected="selected"';} ?>>
+              <?php if(isset($row_style['values']['size']) && $row_style['values']['size'] == "excerpt") { print 'selected="selected"';} ?>>
         Excerpt
       </option>
     </select>

@@ -247,6 +247,7 @@ function qw_execute_query_page(){
       $post->post_type    = 'page';
       $post->post_category= array('uncategorized');
       $post->post_excerpt = '';
+      $post->ancestors    = array();
 
     // set some query information
     $wp_query->queried_object = $post;
@@ -267,9 +268,9 @@ function qw_execute_query_page(){
     // According to http://codex.wordpress.org/Plugin_API/Action_Reference
     // we can safely exit here. The template will take care of the rest.
     // chosen template path
-    $template_path = TEMPLATEPATH."/".$options['display']['page']['template-file'];
+    $template_path = locate_template(array($options['display']['page']['template-file']));
     if(!file_exists($template_path)) {
-      $template_path = TEMPLATEPATH."/".qw_default_template_file();
+      $template_path = locate_template(array(qw_default_template_file()));
     }
 
     include($template_path);
