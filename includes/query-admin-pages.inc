@@ -3,6 +3,7 @@
  * Handle the display of pages and actions
  */
 function qw_page_handler(){
+  $redirect = false;
   // handle actions
   if(isset($_GET['action']))
   {
@@ -50,7 +51,7 @@ function qw_page_handler(){
     qw_edit_query_form();
   }
   // export a query
-  else if ($_GET['export'] && is_numeric($_GET['export'])){
+  else if (isset($_GET['export']) && is_numeric($_GET['export'])){
     qw_export_page();
   }
   // else we need a list of queries
@@ -74,7 +75,7 @@ function qw_edit_query_form(){
 
   // preprocess existing handlers
   $filters = qw_preprocess_handlers('filter', $options['args']['filters']);
-  $fields  = qw_preprocess_handlers('field', $options['display']['field_settings']['fields']);
+  $fields  = (isset($options['display']['field_settings']['fields'])) ? qw_preprocess_handlers('field', $options['display']['field_settings']['fields']) : array();
   $sorts   = qw_preprocess_handlers('sort', $options['args']['sorts']);
 
   $theme = get_option('qw_edit_theme');
@@ -92,7 +93,7 @@ function qw_edit_query_form(){
     'display' => $options['display'],
     'query_name' => $row->name,
     'query_type' => $row->type,
-    'query_page_title' => $options['display']['title'],
+    'query_page_title' => isset($options['display']['title']) ? $options['display']['title'] : '',
     'filters' => $filters,
     'fields' => $fields,
     'sorts' => $sorts,

@@ -1,6 +1,7 @@
 <?php
   $link_selected            = ($field['values']['link']) ? 'checked="checked"' : '';
   $has_label                = ($field['values']['has_label']) ? 'checked="checked"' : '';
+  $label                    = ($field['values']['label']) ? $field['values']['label'] : "";
   $rewrite_output_selected  = ($field['values']['rewrite_output']) ? 'checked="checked"': '';
   $exclude_display_selected = ($field['values']['exclude_display']) ? 'checked="checked"' : '';
 ?>
@@ -42,7 +43,7 @@
 
     <p class="description"><?php print $field['description']; ?></p>
 
-    <?php if ($field['form']) { ?>
+    <?php if (isset($field['form'])) { ?>
       <div class="qw-field-form qw-setting">
         <?php print $field['form']; ?>
       </div>
@@ -79,7 +80,7 @@
           <strong>Label Text: </strong>
           <input type="text"
                  name="<?php print $field['form_prefix']; ?>[label]"
-                 value="<?php print $field['values']['label']; ?>"/>
+                 value="<?php print $label; ?>"/>
         </div>
       </div>
 
@@ -101,7 +102,7 @@
               Available replacement tokens.  These tokens will be replaced with the processed results of their fields.
             </p>
             <?php
-              if(is_array($tokens))
+              if(isset($tokens) && is_array($tokens))
               { ?>
                 <ul class="qw-field-tokens-list">
                   <?php

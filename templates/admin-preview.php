@@ -18,9 +18,10 @@ ob_start();
   print qw_template_query($wp_query, $options);
 $preview = ob_get_clean();
 
+// php wp_query
+$php_wpquery = '<pre>$query = '.var_export($args,1).';</pre>';
 // args
 $args = "<pre>".print_r($args, true)."</pre>";
-
 // display
 $display = "<pre>".htmlentities(print_r($options['display'], true))."</pre>";
 
@@ -29,6 +30,7 @@ $new_query = "<pre>".print_r($qp,true)."</pre>"."<pre>".print_r($wp_query,true).
 // return
 $preview = array(
   'preview' => $preview,
+  'php_wpquery' => $php_wpquery,
   'args' => $args,
   'display' => $display,
   'wpquery' => $new_query,

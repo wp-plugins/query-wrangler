@@ -247,6 +247,7 @@ function qw_execute_query_page(){
       $post->post_type    = 'page';
       $post->post_category= array('uncategorized');
       $post->post_excerpt = '';
+      $post->ancestors = array();
 
     // set some query information
     $wp_query->queried_object = $post;

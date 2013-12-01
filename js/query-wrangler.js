@@ -34,6 +34,7 @@ QueryWrangler.get_preview = function() {
     success: function(results){
       jQuery('#query-preview-target').html(results.preview);
       jQuery('#qw-show-arguments-target').html(results.args);
+      jQuery('#qw-show-php_wpquery-target').html(results.php_wpquery);
       jQuery('#qw-show-display-target').html(results.display);
       jQuery('#qw-show-wpquery-target').html(results.wpquery);
     }

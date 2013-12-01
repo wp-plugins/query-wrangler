@@ -3,7 +3,7 @@ Contributors: daggerhart, forrest.livengood
 Donate link: http://www.widgetwrangler.com/
 Tags: query, pages, widget, admin, widgets, administration, manage, views
 Requires at least: 3
-Tested up to: 3.3.1
+Tested up to: 3.7.1
 Stable tag: trunk
 
 Query Wrangler provides an intuitive interface for creating complex WP queries as pages or widgets. Based on Drupal Views.
@@ -15,6 +15,8 @@ This plugin lets you create new WP queries as pages or widgets.  It also allows 
 Query Wrangler's interface is highly intuitive way to create queries and will be second nature for any Drupal Views user.
 
 This plugin will bring extreme flexibility to WordPress users with its ability to create custom queries using the WP_Query class with a user interface.
+
+WARNING - Do not rely heavily on query pages unless you have to.  They will be removed in future versions in favor of placing shortcodes on real WP Pages.
 
 Additional Plugins
 
@@ -57,6 +59,15 @@ Select a category or multiple categories to override.   Save the query, then vis
 1. Tabs Editor Theme
 
 == Changelog ==
+
+= 1.5rc13 =
+
+* Fix: Shortcode & Widget paging - but can't have 2 independent pagers on 1 page yet.
+* Fix: Unserialize bug - http://wordpress.org/support/topic/bug-that-wipes-all-settings-of-query-after-excluding-fields-from-display?replies=2
+* Fix: 3.7 problem - according to - http://wordpress.org/support/topic/update-has-broken-site#post-4868397
+* Fix: Row style settings form bug 
+* More complete default query according to WP_Query defaults
+* Feature: PHP WP_Query in preview
 
 = 1.5rc12 =
  
@@ -160,4 +171,4 @@ Select a category or multiple categories to override.   Save the query, then vis
 
 == Upgrade Notice ==
 
-1.5rc12 Better fix for page route handling
+1.5rc13 Fixing bugs - page handling, unserialize.  Adding features - widget & shortcode paging
