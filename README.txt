@@ -16,7 +16,7 @@ Query Wrangler's interface is highly intuitive way to create queries and will be
 
 This plugin will bring extreme flexibility to WordPress users with its ability to create custom queries using the WP_Query class with a user interface.
 
-WARNING - Do not rely heavily on query pages unless you have to.  They will be removed in future versions in favor of placing shortcodes on real WP Pages.
+WARNING - Do not rely heavily on query pages unless you must.  They will be removed in future versions in favor of placing shortcodes on real WP Pages.
 
 Additional Plugins
 
@@ -59,6 +59,12 @@ Select a category or multiple categories to override.   Save the query, then vis
 1. Tabs Editor Theme
 
 == Changelog ==
+
+= 1.5rc14 =
+
+* Fix: Child theme page templating
+* Fix: Comment disabling works on pages with shortcodes
+* Feature/Fix: Theme compatibility for widgets - enable in QW settings.
 
 = 1.5rc13 =
 
@@ -171,4 +177,4 @@ Select a category or multiple categories to override.   Save the query, then vis
 
 == Upgrade Notice ==
 
-1.5rc13 Fixing bugs - page handling, unserialize.  Adding features - widget & shortcode paging
+1.5rc14 Backup and test if possible before upgrading. Fixing bugs - Child theme templates, disable page comment settings when using shortcodes. Adding features - Widget theme compatibility

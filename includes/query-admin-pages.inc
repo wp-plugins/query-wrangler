@@ -144,12 +144,14 @@ function qw_edit_query_form(){
  */
 function qw_save_settings($post){
   update_option('qw_edit_theme', $post['qw-theme']);
+  update_option('qw_widget_theme_compat', $post['qw-widget-theme-compat']);
 }
 function qw_settings_page()
 {
   $settings_args = array(
     'theme' => get_option('qw_edit_theme'),
     'edit_themes' => qw_all_edit_themes(),
+    'widget_theme_compat' => get_option('qw_widget_theme_compat'),
   );
   $args = array(
     'title' => 'Query Wrangler Settings',

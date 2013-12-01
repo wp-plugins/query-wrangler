@@ -9,10 +9,6 @@
  */
 function qw_execute_query($query_id, $options_override = array(), $reset_post_data = true)
 {
-  global $wp_query;
-  // backup the old query
-  $old_query = clone $wp_query;
-
   // get the query options
   $options = qw_generate_query_options($query_id, $options_override);
 
@@ -23,18 +19,17 @@ function qw_execute_query($query_id, $options_override = array(), $reset_post_da
   do_action_ref_array('qw_pre_query', array(&$args));
 
   // set the new query
-  $wp_query = new WP_Query($args);
+  $qw_query = new WP_Query($args);
 
   // pre_render hook
   do_action_ref_array('qw_pre_render', array(&$options));
 
   // get the themed content
-  $themed = qw_template_query($wp_query, $options);
+  $themed = qw_template_query($qw_query, $options);
 
   // Reset Post Data
   if($reset_post_data){
     wp_reset_postdata();
-    $wp_query = $old_query;
   }
 
   return $themed;
@@ -54,7 +49,7 @@ function qw_execute_query($query_id, $options_override = array(), $reset_post_da
  */
 function qw_generate_query_options($query_id, $options_override = array(), $full_override = false)
 {
-  global $wpdb, $wp_query;
+  global $wpdb;
   $table_name = $wpdb->prefix."query_wrangler";
   $sql = "SELECT id,name,type,slug,data FROM ".$table_name." WHERE id = ".$query_id;
 
@@ -102,8 +97,6 @@ function qw_generate_query_args($options = array(), $options_override = array())
   $args['paged'] = qw_get_page_number();  
   $args['posts_per_page'] = ($options['args']['posts_per_page']) ? $options['args']['posts_per_page']: 5;
   $args['offset']         = ($options['args']['offset']) ? $options['args']['offset']: 0;
-  //$args['orderby']        = ($options['args']['orderby']) ? $options['args']['orderby']: 'none';
-  //$args['order']          = ($options['args']['order']) ? $options['args']['order']: 'ASC';
   $args['post_status']    = $options['args']['post_status'];
 
   // handle sorts
@@ -151,6 +144,7 @@ function qw_generate_query_args($options = array(), $options_override = array())
   }
   return $args;
 }
+
 /*
  * Get all queries of the type widget
  *
@@ -172,6 +166,7 @@ function qw_get_all_widgets()
     return $widgets;
   }
 }
+
 /*
  * Get all query pages
  *
@@ -204,21 +199,21 @@ function qw_get_all_pages()
 
 /*
  * Helper function: Get the current page number
- * @param object $wp_query - the query being displayed
+ * @param object $qw_query - the query being displayed
  *
  * @return
  *    int - the currentpage number
  */
-function qw_get_page_number($wp_query = NULL){
+function qw_get_page_number($qw_query = NULL){
   // help figure out the current page
   $path_array = explode('/page/', $_SERVER['REQUEST_URI']);
 
   // look for WP paging first
-  if (!is_null($wp_query) && isset($wp_query->query_vars['paged'])){
-    $page = $wp_query->query_vars['paged'];
+  if (!is_null($qw_query) && isset($qw_query->query_vars['paged'])){
+    $page = $qw_query->query_vars['paged'];
   }
   // try wordpress method
-  else if (!is_null($wp_query) && get_query_var('paged')){
+  else if (!is_null($qw_query) && get_query_var('paged')){
     $page = get_query_var('paged');
   }
   // paging with slashes
@@ -239,6 +234,7 @@ function qw_get_page_number($wp_query = NULL){
   }
   return $page;
 }
+
 /*
  * Get full term data
  *
@@ -290,20 +286,20 @@ function qw_get_term($term, $by = 'id' , $return_type = OBJECT){
 function qw_trim(&$value){
   $value = trim($value);
 }
+
 /*
  * Serialize wrapper functions for future changes.
  */
 function qw_serialize($array){
   return serialize($array);
 }
+
 /*
  * Custom: Fix unserialize problem with quotation marks
  */
 function qw_unserialize($serial_str) {
-  $serial_str= preg_replace('!s:(\d+):"(.*?)";!se', "'s:'.strlen('$2').':\"$2\";'", $serial_str ); 
-  //$serial_str= str_replace("\r", "", $serial_str);
-  //$serial_str= str_replace("\n", "", $serial_str);
   $array = array();
+  $serial_str= preg_replace('!s:(\d+):"(.*?)";!se', "'s:'.strlen('$2').':\"$2\";'", $serial_str ); 
   $array = unserialize($serial_str);
   if(is_array($array)){
     // stripslashes twice for science
@@ -312,6 +308,7 @@ function qw_unserialize($serial_str) {
     return $array;
   }
 }
+
 /*
  * Support function for legacy, pre hook_keys discovery
  */
@@ -361,6 +358,7 @@ function qw_make_form_prefix($type, $name){
   $output.= "[".$name."]";
   return $output;
 }
+
 /*
  * Function for grabbing meta keys
  *
@@ -377,6 +375,7 @@ function qw_get_meta_keys() {
 
 	return $keys;
 }
+
 /*
  * usort callback. I likely stole this from somewhere.. like php.net
  */
