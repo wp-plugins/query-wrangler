@@ -60,6 +60,11 @@ Select a category or multiple categories to override.   Save the query, then vis
 
 == Changelog ==
 
+= 1.5rc15 =
+
+* Compatibility issues with Widget Wrangler
+* Feature: Template suggestions in preview.
+
 = 1.5rc14 =
 
 * Fix: Child theme page templating
@@ -177,4 +182,4 @@ Select a category or multiple categories to override.   Save the query, then vis
 
 == Upgrade Notice ==
 
-1.5rc14 Backup and test if possible before upgrading. Fixing bugs - Child theme templates, disable page comment settings when using shortcodes. Adding features - Widget theme compatibility
+1.5rc15 Fixing compatibility issue with Widget Wrangler.  This upgrade is not necessary if not using Widget Wrangler.

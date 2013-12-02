@@ -597,6 +597,12 @@ $display = array_map( 'stripslashes_deep', $display );
           <!-- WP_Query -->
         </div>
       </div>
+      <div class="group">
+        <div class="qw-setting-header">Template Suggestions</div>
+        <div id="qw-show-templates-target">
+          <!-- WP_Query -->
+        </div>
+      </div>
     </div>
 
   </div>
