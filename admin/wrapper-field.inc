@@ -24,7 +24,7 @@
            type='hidden'
            name='<?php print $field['form_prefix']; ?>[hook_key]'
            value='<?php print $field['hook_key']; ?>' />
-    <input class='qw-field-name'
+    <input class='qw-field-name qw-js-title'
            type='hidden'
            name='<?php print $field['form_prefix']; ?>[name]'
            value='<?php print $field['name']; ?>' />
@@ -78,7 +78,8 @@
         </div>
         <div class="qw-options-group-content qw-field-options-hidden">
           <strong>Label Text: </strong>
-          <input type="text"
+          <input class='qw-js-title'
+                 type="text"
                  name="<?php print $field['form_prefix']; ?>[label]"
                  value="<?php print $label; ?>"/>
         </div>
@@ -101,21 +102,18 @@
             <p>
               Available replacement tokens.  These tokens will be replaced with the processed results of their fields.
             </p>
-            <?php
-              if(isset($tokens) && is_array($tokens))
-              { ?>
-                <ul class="qw-field-tokens-list">
-                  <?php
-                    foreach($tokens as $token)
-                    { ?>
-                      <li><?php print $token; ?></li>
-                      <?php
-                    }
-                  ?>
-                </ul>
-                <?php
-              }
-            ?>
+            <ul class="qw-field-tokens-list">
+              <?php
+                if(isset($tokens) && is_array($tokens))
+                {
+                  foreach($tokens as $token)
+                  { ?>
+                    <li><?php print $token; ?></li>
+                    <?php
+                  }
+                }
+              ?>
+            </ul>
           </div>
         </div>
       </div>

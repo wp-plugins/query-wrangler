@@ -9,13 +9,13 @@
 function qw_templates($templates){
   // preview query
   $templates['query_preview'] = array(
-    'files' => 'templates/admin-preview.php',
+    'files' => 'admin/wrapper-preview.inc',
     'default_path' => QW_PLUGIN_DIR,
     'arguments' => array('options' => NULL),
   );
   // edit query template
   $templates['query_edit'] = array(
-    'files' => 'themes/[theme]/query-edit-[theme].inc',
+    'files' => 'admin/editors/[theme]/query-edit-[theme].inc',
     'default_path' => QW_PLUGIN_DIR,
     'arguments' => array(
       'theme' => get_option('qw_edit_theme'),
@@ -23,22 +23,22 @@ function qw_templates($templates){
   );
   // create query template
   $templates['query_create'] = array(
-    'files' => 'forms/query-create.inc',
+    'files' => 'admin/page-query-create.inc',
     'default_path' => QW_PLUGIN_DIR,
   );
   // import query template
   $templates['query_import'] = array(
-    'files' => 'forms/query-import.inc',
+    'files' => 'admin/page-query-import.inc',
     'default_path' => QW_PLUGIN_DIR,
   );
   // import query template
   $templates['query_settings'] = array(
-    'files' => 'forms/query-settings.inc',
+    'files' => 'admin/page-query-settings.inc',
     'default_path' => QW_PLUGIN_DIR,
   );
   // export query template
   $templates['query_export'] = array(
-    'files' => 'forms/query-export.inc',
+    'files' => 'admin/page-query-export.inc',
     'default_path' => QW_PLUGIN_DIR,
     'arguments' => array(
       'query_id' => 0,
@@ -46,34 +46,19 @@ function qw_templates($templates){
   );
 // field template
   $templates['query_field'] = array(
-    'files' => 'forms/field-wrapper.inc',
-    'default_path' => QW_PLUGIN_DIR,
-  );
-  // sortable fields template
-  $templates['query_field_sortable'] = array(
-    'files' => 'forms/field-sortable.inc',
+    'files' => 'admin/wrapper-field.inc',
     'default_path' => QW_PLUGIN_DIR,
   );
 
 // filters edit form
   $templates['query_filter'] = array(
-    'files' => 'forms/filter-wrapper.inc',
-    'default_path' => QW_PLUGIN_DIR,
-  );
-  // filters sortable template
-  $templates['query_filter_sortable'] = array(
-    'files' => 'forms/filter-sortable.inc',
+    'files' => 'admin/wrapper-filter.inc',
     'default_path' => QW_PLUGIN_DIR,
   );
 
 // sorts edit form
   $templates['query_sort'] = array(
-    'files' => 'forms/sort-wrapper.inc',
-    'default_path' => QW_PLUGIN_DIR,
-  );
-  // sorts sortable template
-  $templates['query_sort_sortable'] = array(
-    'files' => 'forms/sort-sortable.inc',
+    'files' => 'admin/wrapper-sort.inc',
     'default_path' => QW_PLUGIN_DIR,
   );
 
@@ -107,8 +92,8 @@ function qw_templates($templates){
   // useful for plugin admin pages
   $templates['admin_wrapper'] = array(
     'files' => array(
-        'templates/admin-wrapper.php',
-        'admin-wrapper.php',
+        'admin/wrapper-admin.inc',
+        'wrapper-admin.inc',
     ),
     'default_path' => QW_PLUGIN_DIR,
     'arguments' => array(
@@ -399,7 +384,7 @@ function qw_make_fields_rows(&$qw_query, $options)
         // apply labels to full style fields
         if(isset($field_settings['has_label']) &&
            $display['type'] != 'full' &&
-           $display['field_settings']['style'] != 'table')
+           $display['style'] != 'table')
         {
           $rows[$i]['fields'][$field_name]['output'] = '<label class="query-label">'.$field_settings['label'].'</label> '.$rows[$i]['fields'][$field_name]['output'];
         }
@@ -582,12 +567,22 @@ function qw_theme_image($post, $field)
   $count = $field['image_display_count'];
 
   $images = qw_get_post_images($post->ID);
+  $featured_image_id = isset($field['featured_image']) ? get_post_thumbnail_id($post->ID) : NULL;
+  
   if(is_array($images)){
     $output = '';
     $i = 0;
     foreach($images as $image){
-      if($count == 0 || ($i < $count)){
-        $output.= wp_get_attachment_image($image->ID, $style);
+      if ($featured_image_id){
+        if ($image->ID == $featured_image_id){
+          $output.= wp_get_attachment_image($image->ID, $style);
+        }
+      }
+      else{
+        // ensure less than count
+        if($count == 0 || ($i < $count)){
+          $output.= wp_get_attachment_image($image->ID, $style);
+        }
       }
       $i++;
     }
@@ -603,7 +598,7 @@ function qw_theme_image($post, $field)
  */
 function qw_get_post_images($post_id)
 {
-		$child_args = array(
+	$child_args = array(
     "post_type" => "attachment",
     "post_mime_type" => "image",
     "post_parent" => $post_id
@@ -611,28 +606,27 @@ function qw_get_post_images($post_id)
 		// Get images for this post
   $images = &get_children($child_args);
 
-		// If images exist for this page
-		if(is_array($images))
-		{
-				// sort this so menu order matters
-				$sorted = array();
+  // If images exist for this page
+  if(is_array($images))
+  {
+    // sort this so menu order matters
+    $sorted = array();
     $unsorted = array();
-				foreach ($images as $image)
-				{
+    foreach ($images as $image)
+    {
       if($image->menu_order !== 0){
         $sorted[$image->menu_order] = $image;
       }
       else {
         $unsorted[] = $image;
       }
-				}
+    }
     // sort menu order
     ksort($sorted);
     // reset array
     $sorted = array_values($sorted);
     // add unsorted
     $sorted = array_merge($sorted, $unsorted);
-
-				return $sorted;
-		}
+    return $sorted;
+  }
 }
