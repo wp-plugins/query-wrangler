@@ -227,13 +227,13 @@ function qw_template_query(&$qw_query, $options)
     $style = $all_styles[$options['display']['style']];
 
      // setup row template arguments
-     $template_args = array(
-       'template' => 'query-'.$style['hook_key'],
-       'slug' => $options['meta']['slug'],
-       'style' => $style['hook_key'],
-       'style_settings' => $options['display'][$style['settings_key']],
-       'options' => $options,
-      );
+    $template_args = array(
+      'template' => 'query-'.$style['hook_key'],
+      'slug' => $options['meta']['slug'],
+      'style' => $style['hook_key'],
+      'style_settings' => $options['display'][$style['settings_key']],
+      'options' => $options,
+    );
 
     // the content of the widget is the result of the query
     if($options['display']['row_style'] == "posts") {

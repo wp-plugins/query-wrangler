@@ -27,7 +27,7 @@
         <strong>Widget Theme Compatibility</strong>
       </label>
     </div>
-    <p class="description">If you're having trouble with the way Qyery Wrangler Widgets appear in your sidebar, select this option.</p>
+    <p class="description">If you're having trouble with the way Query Wrangler Widgets appear in your sidebar, select this option.</p>
   </div>
   
 </div>

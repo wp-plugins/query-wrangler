@@ -37,6 +37,7 @@ QueryWrangler.get_preview = function() {
       jQuery('#qw-show-php_wpquery-target').html(results.php_wpquery);
       jQuery('#qw-show-display-target').html(results.display);
       jQuery('#qw-show-wpquery-target').html(results.wpquery);
+      jQuery('#qw-show-templates-target').html(results.templates);
     }
   });
   // hide throbber
