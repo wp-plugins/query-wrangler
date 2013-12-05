@@ -363,11 +363,6 @@ function qw_make_fields_rows(&$qw_query, $options)
           $rows[$i]['fields'][$field_name]['output'].= $this_post->{$field_settings['type']};
         }
 
-        // apply link to field
-        if(isset($field_settings['link'])){
-          $rows[$i]['fields'][$field_name]['output'] = '<a class="query-field-link" href="'.get_permalink().'">'.$rows[$i]['fields'][$field_name]['output'].'</a>';
-        }
-
         // add token for replace
         $tokens['{{'.$field_name.'}}'] = $rows[$i]['fields'][$field_name]['output'];
 
@@ -378,6 +373,11 @@ function qw_make_fields_rows(&$qw_query, $options)
           $rows[$i]['fields'][$field_name]['output'] = $field_settings['custom_output'];
         }
 
+        // apply link to field
+        if(isset($field_settings['link'])){
+          $rows[$i]['fields'][$field_name]['output'] = '<a class="query-field-link" href="'.get_permalink().'">'.$rows[$i]['fields'][$field_name]['output'].'</a>';
+        }
+        
         // get default field label for tables
         $rows[$i]['fields'][$field_name]['label'] = ($field_settings['has_label']) ? $field_settings['label'] : '';
 
