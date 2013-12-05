@@ -59,6 +59,10 @@ Select a category or multiple categories to override.   Save the query, then vis
 
 == Changelog ==
 
+= 1.5rc17 =
+
+* Fix: post_parent filter
+
 = 1.5rc16 =
 
 * Feature: New taxonomies filter
@@ -191,4 +195,4 @@ Select a category or multiple categories to override.   Save the query, then vis
 
 == Upgrade Notice ==
 
-1.5rc16 New taxonomies filter, new featured image setting for image attachment field. Better JS
+1.5rc17  Fix post_parent filter
