@@ -1,4 +1,8 @@
 <?php
+
+// add default field styles to the filter
+add_filter('qw_sort_options', 'qw_default_sort_options');
+
 /*
  * Default Sort Options
  *
@@ -97,31 +101,31 @@ function qw_default_sort_options($sort_options){
   );
   return $sort_options;
 }
-// add default field styles to the filter
-add_filter('qw_sort_options', 'qw_default_sort_options');
 
 /*
  * Default sort options 'order' options form
  */
 function qw_form_default_sort_order_options($sort)
 {
-  ob_start();
   ?>
-    <!-- sort options -->
-    <label class="qw-label">Order by <?php print $sort['title']; ?>:</label>
-    <select name="<?php print $sort['form_prefix']; ?>[order_value]">
-      <?php
-        foreach ($sort['order_options'] as $value => $label)
-        { ?>
-          <option value="<?php print $value; ?>"
-                  <?php if($sort['values']['order_value'] == $value) { print 'selected="selected"';} ?>>
-            <?php print $label; ?>
-          </option>
-          <?php
-        }
-      ?>
-    </select>
+    <p>
+      <!-- sort options -->
+      <label class="qw-label">Order by <?php print $sort['title']; ?>:</label>
+      <select class='qw-js-title' name="<?php print $sort['form_prefix']; ?>[order_value]">
+        <?php
+          foreach ($sort['order_options'] as $value => $label)
+          {
+            $selected = ($sort['values']['order_value'] == $value) ? 'selected="selected"' : '';
+            ?>
+            <option value="<?php print $value; ?>"
+                    <?php print $selected; ?>>
+              <?php print $label; ?>
+            </option>
+            <?php
+          }
+        ?>
+      </select>
+    </p>
     <p class="description">Select how to order the results.</p>
   <?php
-  return ob_get_clean();
 }

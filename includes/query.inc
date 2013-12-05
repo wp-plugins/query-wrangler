@@ -92,14 +92,55 @@ function qw_generate_query_args($options = array(), $options_override = array())
 {
   $all_filters = qw_all_filters();
   $all_sorts = qw_all_sort_options();
-
+  $handlers = qw_preprocess_handlers($options);
+  
   // standard arguments
   $args['paged'] = qw_get_page_number();  
   $args['posts_per_page'] = ($options['args']['posts_per_page']) ? $options['args']['posts_per_page']: 5;
   $args['offset']         = ($options['args']['offset']) ? $options['args']['offset']: 0;
   $args['post_status']    = $options['args']['post_status'];
 
-  // handle sorts
+  foreach ($handlers as $handler_type => $handler)
+  {
+    if (is_array($handler['items'])){
+      foreach($handler['items'] as $name => $item)
+      {
+        /*/ Exposed items
+        if (isset($item['exposed_form'])){
+          if(!empty($item['values']['exposed_key'])){
+            // override exposed key
+            $item['exposed_key'] = $item['values']['exposed_key'];
+          } else {
+            // default exposed key
+            $item['exposed_key'] = 'exposed_'.$item['values']['name'];
+          }
+        }
+        // */
+        
+        // Alter the query args
+        // look for callback, and run it
+        if (isset($item['query_args_callback']) && function_exists($item['query_args_callback'])){
+          $item['query_args_callback']($args, $item);
+        }
+        else if (isset($item['orderby_key']) && isset($item['order_key'])){
+          // else, default to type as WP_Query argument key
+          // arguments passed to query
+          $args[$item['orderby_key']] = $item['type'];
+          $args[$item['order_key']] = $item['values']['order_value'];
+        }
+
+        /*/ Process submitted exposed values
+        // exposed items
+        if(isset($item['values']['is_exposed']) && function_exists($item['exposed_process'])){
+          $value = $submitted_data[$item['exposed_key']];
+          $item['exposed_process']($args, $item, $value);
+        }
+        //*/
+      }
+    }
+  }
+  
+  /*/ handle sorts
   if(is_array($options['args']['sorts'])){
 
     foreach($options['args']['sorts'] as $sort)
@@ -142,6 +183,7 @@ function qw_generate_query_args($options = array(), $options_override = array())
       }
     }
   }
+  */
   return $args;
 }
 

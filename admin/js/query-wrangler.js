@@ -49,9 +49,9 @@ QueryWrangler.get_preview = function() {
  */
 QueryWrangler.generate_field_tokens = function() {
   var tokens = [];
-  jQuery('#existing-fields div.qw-field').each(function(){
+  jQuery('#existing-fields div.qw-field').each(function(i, element){
     // field name
-    var field_name = jQuery(this).find('.qw-field-name').val();
+    var field_name = jQuery(element).find('.qw-field-name').val();
     // add tokens
     tokens.push('<li>{{'+field_name+'}}</li>');
     // target the field and insert tokens

@@ -9,7 +9,7 @@ Plugin URI:        http://www.widgetwrangler.com/query-wrangler
 Description:       Query Wrangler provides an intuitive interface for creating complex WP queries as pages or widgets. Based on Drupal Views.
 Author:            Jonathan Daggerhart, Forrest Livengood
 Author URI:        http://www.websmiths.co
-Version:           1.5rc15
+Version:           1.5rc17
 
 ******************************************************************
 
@@ -48,15 +48,52 @@ function qw_init_frontend(){
   }
   // Wordpress hooks
   include_once QW_PLUGIN_DIR.'/includes/hooks.inc';
-  include_once QW_PLUGIN_DIR.'/includes/data.defaults.inc';
-  include_once QW_PLUGIN_DIR.'/includes/data.default_basics.inc';
-  include_once QW_PLUGIN_DIR.'/includes/data.default_filters.inc';
-  include_once QW_PLUGIN_DIR.'/includes/data.default_fields.inc';
-  include_once QW_PLUGIN_DIR.'/includes/data.default_sorts.inc';
+  
+  include_once QW_PLUGIN_DIR.'/includes/handlers.inc';
+  
+  //include_once QW_PLUGIN_DIR.'/includes/data.defaults.inc';
+  
+  //include_once QW_PLUGIN_DIR.'/includes/data.default_basics.inc';
+  include_once QW_PLUGIN_DIR.'/includes/basics/display_title.inc';
+  include_once QW_PLUGIN_DIR.'/includes/basics/template_styles.inc';
+  include_once QW_PLUGIN_DIR.'/includes/basics/row_styles.inc';
+  include_once QW_PLUGIN_DIR.'/includes/basics/posts_per_page.inc';
+  include_once QW_PLUGIN_DIR.'/includes/basics/post_status.inc';
+  include_once QW_PLUGIN_DIR.'/includes/basics/offset.inc';
+  include_once QW_PLUGIN_DIR.'/includes/basics/header.inc';
+  include_once QW_PLUGIN_DIR.'/includes/basics/footer.inc';
+  include_once QW_PLUGIN_DIR.'/includes/basics/empty.inc';
+  include_once QW_PLUGIN_DIR.'/includes/basics/wrapper_settings.inc';
+  include_once QW_PLUGIN_DIR.'/includes/basics/page_path.inc';
+  include_once QW_PLUGIN_DIR.'/includes/basics/page_template.inc';
+  include_once QW_PLUGIN_DIR.'/includes/basics/pager.inc';
+  
+  include_once QW_PLUGIN_DIR.'/includes/fields/default_fields.inc';
+  include_once QW_PLUGIN_DIR.'/includes/fields/post_author.inc';
+  include_once QW_PLUGIN_DIR.'/includes/fields/post_author_avatar.inc';
+  include_once QW_PLUGIN_DIR.'/includes/fields/file_attachment.inc';
+  include_once QW_PLUGIN_DIR.'/includes/fields/image_attachment.inc';
+  include_once QW_PLUGIN_DIR.'/includes/fields/meta_value.inc';
+  
+  //include_once QW_PLUGIN_DIR.'/includes/data.default_filters.inc';
+  include_once QW_PLUGIN_DIR.'/includes/filters/post_types.inc';
+  include_once QW_PLUGIN_DIR.'/includes/filters/post_id.inc';
+  include_once QW_PLUGIN_DIR.'/includes/filters/meta_key.inc';
+  include_once QW_PLUGIN_DIR.'/includes/filters/meta_key_value.inc';
+  include_once QW_PLUGIN_DIR.'/includes/filters/meta_value.inc';
+  include_once QW_PLUGIN_DIR.'/includes/filters/tags.inc';
+  include_once QW_PLUGIN_DIR.'/includes/filters/categories.inc';
+  include_once QW_PLUGIN_DIR.'/includes/filters/post_parent.inc';
+  include_once QW_PLUGIN_DIR.'/includes/filters/taxonomies.inc';
+  include_once QW_PLUGIN_DIR.'/includes/filters/taxonomy_relation.inc';
+  
+  include_once QW_PLUGIN_DIR.'/includes/sorts/default_sorts.inc';
+  
   // Necessary functions to show a query
   include_once QW_PLUGIN_DIR.'/includes/query.inc';
   include_once QW_PLUGIN_DIR.'/includes/theme.inc';
   include_once QW_PLUGIN_DIR.'/includes/pages.inc';
+  
 }
 function qw_init(){
   qw_init_frontend();
@@ -67,7 +104,7 @@ function qw_init(){
     include_once QW_PLUGIN_DIR.'/includes/query-admin.inc';
     include_once QW_PLUGIN_DIR.'/includes/query-admin-pages.inc';
     include_once QW_PLUGIN_DIR.'/includes/ajax.inc';
-    include_once QW_PLUGIN_DIR.'/includes/data.default_edit_themes.inc';
+    include_once QW_PLUGIN_DIR.'/includes/default_editors.inc';
 
     add_action( 'wp_ajax_nopriv_qw_form_ajax', 'qw_form_ajax' );
     add_action( 'wp_ajax_qw_form_ajax', 'qw_form_ajax' );
@@ -168,7 +205,7 @@ function qw_query_override_terms_table(){
   dbDelta($sql);
 }
 register_activation_hook(__FILE__,'qw_query_override_terms_table');
-/*/
+//
 function _d($v){
   print '<hr/><pre>'.print_r($v,1).'</pre>';
 }
