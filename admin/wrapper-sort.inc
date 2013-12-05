@@ -25,10 +25,12 @@
     <div class="qw-remove button">
       Remove
     </div>
-    <input class='qw-weight'
-           name='qw-query-options[args][sorts][<?php print $sort['name']; ?>][weight]'
-           type='text' size='2'
-           value='<?php print $weight; ?>' />
+    <div class="qw-weight-container">
+      <input class='qw-weight'
+             name='qw-query-options[args][sorts][<?php print $sort['name']; ?>][weight]'
+             type='text' size='2'
+             value='<?php print $weight; ?>' />
+    </div>
 
     <p class="description"><?php print $sort['description']; ?></p>
 

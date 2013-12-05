@@ -56,9 +56,18 @@ Select a category or multiple categories to override.   Save the query, then vis
 == Screenshots ==
 
 1. Drupal Views Editor Theme
-1. Tabs Editor Theme
 
 == Changelog ==
+
+= 1.5rc16 =
+
+* Feature: New taxonomies filter
+* Feature: Featured Image setting for "Image Attachment" field
+* Fix: Making js better
+* Fix: New handler item weight bug
+* Fix: New field tokens bug
+* Remove: tabs editor
+* Refactoring a lot
 
 = 1.5rc15 =
 
@@ -182,4 +191,4 @@ Select a category or multiple categories to override.   Save the query, then vis
 
 == Upgrade Notice ==
 
-1.5rc15 Fixing compatibility issue with Widget Wrangler.  This upgrade is not necessary if not using Widget Wrangler.
+1.5rc16 New taxonomies filter, new featured image setting for image attachment field. Better JS

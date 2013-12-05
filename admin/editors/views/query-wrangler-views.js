@@ -3,9 +3,14 @@ QueryWrangler.set_modified = true;
 /*
  * Move dialog boxes to the form
  */
-QueryWrangler.restore_form = function(dialog){
+QueryWrangler.restore_form = function(dialog, handler){
   jQuery(dialog).dialog('destroy');
-  jQuery(dialog).appendTo('#qw-options-forms').hide();
+  if (handler){
+    jQuery(dialog).appendTo('#existing-'+handler+'s').hide();
+  }
+  else {
+    jQuery(dialog).appendTo('#qw-options-forms').hide();
+  }
 }
 
 /*
@@ -16,7 +21,7 @@ QueryWrangler.restore_form = function(dialog){
 QueryWrangler.get_handler_templates = function(handler, handler_hook, item_type){
   var item_count = jQuery('#qw-options-forms input.qw-'+handler+'-type[value='+item_type+']').length;
   var next_name = (item_count > 0) ? item_type + "_" + item_count: item_type;
-  var next_weight = jQuery('ul#qw-'+handler+'s-sortable li').length;
+  var next_weight = jQuery('#qw-query-'+handler+'s-list .qw-query-title').length;
 
   // prepare post data for form and sortable form
   var post_data_form = {
@@ -40,13 +45,22 @@ QueryWrangler.get_handler_templates = function(handler, handler_hook, item_type)
       // append the results
       jQuery('#existing-'+handler+'s').append(results);
       QueryWrangler.add_list_item(post_data_form);
+      
+      if (handler == 'field'){
+          // Update Field tokens
+        QueryWrangler.generate_field_tokens();
+      }
     }
   });
 
   QueryWrangler.toggle_empty_lists();
-
+  
   return next_name;
 }
+
+/*
+ * Add new qw-query-title
+ */
 QueryWrangler.add_list_item = function(post_data_form){
   var title ;
   switch(post_data_form.handler){
@@ -69,6 +83,7 @@ QueryWrangler.add_list_item = function(post_data_form){
 
   jQuery('#qw-query-'+post_data_form.handler+'s-list').append(output);
 }
+
 /*
  * Dynamically set the setting title for updated fields
  */
@@ -76,48 +91,45 @@ QueryWrangler.set_setting_title = function(){
   //gather all info
   var form = jQuery('#'+QueryWrangler.current_form_id);
   var settings = jQuery('div[title='+QueryWrangler.current_form_id+']');
-  var fields = form.find('input[type=text],input[type=checkbox],select,textarea,input[type=hidden]').not('.qw-weight').not('.qw-title-ignore');
-  var new_title = [];
   var title_target = settings.children('.qw-setting-value');
-
-  // fields
-  if(settings.parent().attr('id') == 'qw-query-fields-list'){
-    new_title.push(form.find('input.qw-field-name').val());
-  }
-
-  // loop through the fields
-  jQuery.each(fields, function(i, field){
-    // select
-    if (jQuery(field).is('select') &&
-        jQuery(field).val() != '!=')
-    {
-      new_title.push( jQuery(field).children('option[value='+jQuery(field).val()+']').text() );
-    }
-    // text field
-    if (jQuery(field).is('input[type=text]') &&
-        jQuery(field).val() != '')
-    {
-      new_title.push(jQuery(field).val());
-    }
-    // checkbox with value set
-    if (jQuery(field).is('input[type=checkbox]') &&
-        jQuery(field).is(':checked') &&
-        jQuery(field).val() != 'on')
-    {
-      new_title.push(jQuery(field).val());
+  var fields = jQuery(form).find('.qw-js-title');
+  var new_title = [];
+  
+  jQuery.each(fields, function(i, element){
+    var element_tag = jQuery(element).prop('tagName');
+    var element_value = jQuery(element).val();
+    
+    switch (element_tag){
+      case 'INPUT':
+        var tag_type = jQuery(element).attr('type');
+        // checkboxes are special!
+        if (tag_type == 'checkbox'){
+          var is_checked = jQuery(element).prop('checked');
+          if (!element_value) {
+            element_value = (is_checked) ? "on" : "off";
+          }
+          else if (!is_checked){
+            element_value = '';
+          }
+        }
+        
+        if (element_value){
+          new_title.push(element_value);
+        }
+        break;
+      
+      case 'TEXTAREA':
+        if (element_value){
+          new_title.push('In Use');
+        }
+        break;
+      
+      case 'SELECT':
+        new_title.push(element_value);
+        break;
     }
   });
-
-  // single textarea fields, like header, footer, empty
-  if(fields.length == 1 &&
-     jQuery(fields[0]).is('textarea'))
-  {
-    // in use
-    if (jQuery(fields[0]).val().trim() != ''){
-      new_title.push('In Use');
-    }
-  }
-
+  
   // no items found
   if (new_title.length == 0){
     new_title.push('None');
@@ -126,7 +138,7 @@ QueryWrangler.set_setting_title = function(){
   new_title = new_title.join(', ');
   // set new title
   title_target.text(new_title);
-
+  
   if (QueryWrangler.set_modified){
     title_target.parent().addClass('qw-modified');
   }
@@ -150,11 +162,12 @@ QueryWrangler.add_item = function(dialog){
       }
   });
   QueryWrangler.theme_accordions();
-  //jQuery(dialog).dialog('close');
 }
 
+/*
+ * Activate accordions
+ */
 QueryWrangler.theme_accordions = function(){
-  //console.log(jQuery('#display-style-settings, #row-style-settings, .qw-sortable-list'));
   if (jQuery('#display-style-settings, #row-style-settings, .qw-sortable-list').hasClass('is-accordion')){
     jQuery('#display-style-settings, #row-style-settings, .qw-sortable-list')
       .removeClass('is-accordion')
@@ -170,6 +183,9 @@ QueryWrangler.theme_accordions = function(){
   }).addClass('is-accordion');
 }
 
+/*
+ * Handle sortable lists that are empty
+ */
 QueryWrangler.toggle_empty_lists = function(){
   var lists = jQuery(".qw-sortable-list");
   jQuery.each(lists, function(){
@@ -184,9 +200,10 @@ QueryWrangler.toggle_empty_lists = function(){
     }
   });
 }
- /*
-  * Update button
-  */
+
+/*
+ * Update button
+ */
 QueryWrangler.button_update = function(dialog){
   var is_handler = false;
   var form = jQuery('#'+QueryWrangler.current_form_id);
@@ -222,6 +239,7 @@ QueryWrangler.button_update = function(dialog){
   }
   //jQuery(dialog).dialog('close');
 }
+
 /*
  * Cancel button
  */
@@ -230,21 +248,24 @@ QueryWrangler.button_cancel = function(dialog){
     // set backup_form
     jQuery('form#qw-edit-query-form').unserializeForm(QueryWrangler.form_backup);
   }
-
-  //jQuery(dialog).dialog('close');
 }
+
+/*
+ * Build a sortable list from the qw-query-titles
+ */
 QueryWrangler.sortable_list_build = function(element){
   QueryWrangler.current_form_id = jQuery(element).closest('.qw-query-admin-options').attr('id');
 
-  var output = '<ul id="'+QueryWrangler.current_form_id+'-sortable" class="qw-hidden">';
 	//http://stackoverflow.com/questions/8873946/jquery-ui-dialog-height
 	var wWidth = jQuery(window).width();
 	var wHeight = jQuery(window).height();
-
-  jQuery('#'+QueryWrangler.current_form_id+'-list div').each(function(i, element){
-    html = jQuery(element).wrap('<div>').parent().html();
-    output+= '<li class="qw-sortable ui-helper-reset ui-state-default ui-corner-all">'+html+'</li>';
-  });
+  
+  var output = '<ul id="'+QueryWrangler.current_form_id+'-sortable" class="qw-hidden">';
+  jQuery('#'+QueryWrangler.current_form_id+'-list .qw-query-title')
+    .each(function(i, element){
+      html = jQuery(element).wrap('<div>').parent().html();
+      output+= '<li class="qw-sortable ui-helper-reset ui-state-default ui-corner-all">'+html+'</li>';
+    });
   output+= '</ul>';
 
   jQuery(output).appendTo('#qw-options-forms');
@@ -275,10 +296,17 @@ QueryWrangler.sortable_list_build = function(element){
       }]
     });
 }
+
+/*
+ * Destroy sortable list
+ */
 QueryWrangler.sortable_list_destroy = function(dialog){
   jQuery(dialog).dialog('destroy');
 }
 
+/*
+ * Rebuild the list of handler items
+ */
 QueryWrangler.sortable_list_update = function(dialog){
   list_id = QueryWrangler.current_form_id+"-list";
 
@@ -298,6 +326,10 @@ QueryWrangler.sortable_list_update = function(dialog){
 	jQuery('.qw-changes').show();
   //QueryWrangler.sortable_list_update_weights(list_id);
 }
+
+/*
+ * Update handler item weights
+ */
 QueryWrangler.sortable_list_update_weights = function(list_id){
   jQuery(QueryWrangler.handlers).each(function(i, handler){
     jQuery("#existing-"+handler+"s .qw-"+handler)
@@ -326,15 +358,34 @@ jQuery(document).ready(function(){
     QueryWrangler.sortable_list_build(this);
   });
 
-  jQuery('#qw-query-admin-options-wrap').delegate('.qw-query-title', 'click', function(){
+  jQuery('#qw-query-admin-options-wrap').delegate('.qw-query-title', 'click', function(event){
     // backup the form
-    QueryWrangler.form_backup = jQuery('form#qw-edit-query-form').serialize();
-
+    QueryWrangler.form_backup = jQuery('form#qw-edit-query-form').serialize();    
     QueryWrangler.current_form_id = jQuery(this).attr('title');
+    
     var dialog_title = jQuery(this).text().split(':');
 		var wWidth = jQuery(window).width();
 		var wHeight = jQuery(window).height();
-		
+		var clicked_element_title = jQuery(event.currentTarget).attr('title');
+    var handler = '';
+    
+    // find the handler involved
+    if (clicked_element_title.indexOf('-field-') > 0){
+      handler = 'field';
+    }
+    else if (clicked_element_title.indexOf('-filter-') > 0){
+      handler = 'filter';
+    }
+    else if (clicked_element_title.indexOf('-sort-') > 0){
+      handler = 'sort';
+    }
+    else if (clicked_element_title.indexOf('-basic-') > 0){
+      handler = 'basic';
+    }
+    else if (clicked_element_title.indexOf('-override-') > 0){
+      handler = 'override';
+    }
+    
     jQuery('#'+QueryWrangler.current_form_id).dialog({
       modal: true,
       width: (wWidth * 0.7),
@@ -345,19 +396,19 @@ jQuery(document).ready(function(){
 			},			
       resizable: false,
       close: function() {
-        QueryWrangler.restore_form(this);
+        QueryWrangler.restore_form(this, handler);
         QueryWrangler.button_cancel(this);
       },
       buttons: [{
         text: 'Update',
         click: function() {
-          QueryWrangler.restore_form(this);
+          QueryWrangler.restore_form(this, handler);
           QueryWrangler.button_update(this);
         }
       },{
         text: 'Cancel',
         click: function() {
-          QueryWrangler.restore_form(this);
+          QueryWrangler.restore_form(this, handler);
           QueryWrangler.button_cancel(this);
         }
       }]
