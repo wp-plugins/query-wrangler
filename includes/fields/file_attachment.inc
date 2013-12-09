@@ -13,7 +13,7 @@ function qw_field_file_attachment($fields){
   $fields['file_attachment'] = array(
     'title' => 'File Attachment',
     'description' => 'Files that are attached to a post.',
-    'output_callback' => 'qw_theme_file', // in theme.inc
+    'output_callback' => 'qw_theme_file', 
     'output_arguments' => true,
     'form_callback' => 'qw_field_file_attachment_form',
   );
@@ -29,19 +29,22 @@ function qw_default_file_styles($file_styles)
 {
   $file_styles['link'] = array(
     'description' => 'Filename Link to File',
+    //'callback' => 'qw_theme_file',
   );
   $file_styles['link_url'] = array(
     'description' => 'URL Link to File',
+    //'callback' => 'qw_theme_file',
   );
   $file_styles['url'] = array(
     'description' => 'URL of File',
+    //'callback' => 'qw_theme_file',
   );
 
   return $file_styles;
 }
 
 /*
- * File attachment settings
+ * File attachment settings Form
  */
 function qw_field_file_attachment_form($field)
 {
@@ -71,3 +74,67 @@ function qw_field_file_attachment_form($field)
     </p>
   <?php
 }
+
+/*
+ * Get and theme attached post files
+ *
+ * @param int $post_id The post->ID
+ * $param int $count Number of files to get
+ */
+function qw_theme_file($post, $field){
+  $style = ($field['file_display_style']) ? $field['file_display_style'] : 'link';
+  $count = ($field['file_display_count']) ? $field['file_display_count'] : 0;
+
+  $files = qw_get_post_files($post->ID);
+  if(is_array($files))
+  {
+    $output = '';
+    $i=0;
+    foreach($files as $file){
+      if(($count == 0 || ($i < $count)) && substr($file->post_mime_type,0,5) != "image")
+      {
+        switch($style){
+          case 'url':
+          $output .= wp_get_attachment_url($file->ID);
+          break;
+
+          case 'link':
+          // complete file name
+          $file_name = explode("/", $file->guid);
+          $file_name = $file_name[count($file_name)-1];
+          $output.= '<a href="'.wp_get_attachment_url($file->ID).'" class="query-file-link">'.$file_name.'</a>';
+          break;
+
+          case 'link_url':
+            $output.= '<a href="'.wp_get_attachment_url($file->ID).'" class="query-file-link">'.$file->guid.'</a>';
+            break;
+        }
+      }
+      $i++;
+    }
+    return $output;
+  }
+}
+
+/*
+ * Get files attached to a post
+ *
+ * @param int $post_id The WP post id
+ * @return Array of file posts
+ */
+function qw_get_post_files($post_id)
+{
+  $child_args = array(
+    "post_type" => "attachment",
+    "post_parent" => $post_id,
+  );
+		// Get images for this post
+  $files = get_posts($child_args);
+
+  if(is_array($files))
+		{
+    return $files;
+  }
+  return false;
+}
+

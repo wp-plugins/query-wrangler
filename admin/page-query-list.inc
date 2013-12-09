@@ -80,7 +80,7 @@ class Query_Wrangler_List_Table extends WP_List_Table
             case 'details':
                 $details = '';
                 if($item['type'] != 'override') {
-                  $details.='Shortcode: [query id='.$item['ID'].']';
+                  $details.='Shortcode options:<br />[query id='.$item['ID'].']<br />[query slug="'.$item['slug'].'"]';
                 }
                 if($item['type'] == 'override'){
                   global $wpdb;
@@ -345,7 +345,7 @@ class Query_Wrangler_List_Table extends WP_List_Table
         $orderby = (!empty($_REQUEST['orderby'])) ? $_REQUEST['orderby'] : 'name'; //If no sort, default to title
         $order = (!empty($_REQUEST['order'])) ? $_REQUEST['order'] : 'asc'; //If no order, default to asc
 
-        $sql = "SELECT id as ID, type, name, path
+        $sql = "SELECT id as ID, type, name, slug, path
                 FROM ".$wpdb->prefix."query_wrangler
                 ORDER BY ".$orderby." ".$order;
         $data = $wpdb->get_results($sql, ARRAY_A);

@@ -11,7 +11,7 @@ function qw_insert_new_query($post){
 
   $values = array(
     'name' => $post['qw-name'],
-    'slug' => qw_make_slug($post['qw-name']),
+    'slug' => sanitize_title($post['qw-name']),
     'type' => $post['qw-type'],
     'path' => ($post['page-path']) ? urlencode($post['page-path']) : NULL,
     'data' => qw_serialize(qw_default_query_data()),

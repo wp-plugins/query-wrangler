@@ -68,7 +68,7 @@ function qw_edit_query_form(){
   global $wpdb;
   $table_name = $wpdb->prefix."query_wrangler";
   $query_id = $_GET['edit'];
-  $sql = "SELECT name,type,data,path FROM ".$table_name." WHERE id = ".$query_id." LIMIT 1";
+  $sql = "SELECT name,slug,type,data,path FROM ".$table_name." WHERE id = ".$query_id." LIMIT 1";
   $row = $wpdb->get_row($sql);
 
   $options = qw_unserialize($row->data);
@@ -124,7 +124,7 @@ function qw_edit_query_form(){
 
   // admin wrapper arguments
   $admin_args = array(
-    'title' => 'Edit query <em>'.$edit_args['query_name'].'</em>',
+    'title' => 'Edit query <em>'.$edit_args['query_name'].'</em> <sup>'.$row->slug.'</sup>',
     // content is the query_edit page
     'content' => theme('query_edit', $edit_args)
   );

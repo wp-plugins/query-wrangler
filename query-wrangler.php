@@ -9,7 +9,7 @@ Plugin URI:        http://www.widgetwrangler.com/query-wrangler
 Description:       Query Wrangler provides an intuitive interface for creating complex WP queries as pages or widgets. Based on Drupal Views.
 Author:            Jonathan Daggerhart, Forrest Livengood
 Author URI:        http://www.websmiths.co
-Version:           1.5rc17
+Version:           1.5rc18
 
 ******************************************************************
 
@@ -135,6 +135,8 @@ if (!is_admin()){
 add_action('admin_init', 'qw_init', 900);
 add_action('admin_init', 'qw_check_version', 901); // in query-admin.php
 add_action('admin_head', 'qw_admin_css'); // in query-admin.php
+// add menu very last so we don't get replaced by another menu item
+add_action( 'admin_menu', 'qw_menu', 9999);
 
 /*
  * All my hook_menu implementations
@@ -155,16 +157,17 @@ function qw_menu()
   $settings_page= add_submenu_page( 'query-wrangler', 'Settings', 'Settings', 'manage_options', 'qw-settings', 'qw_settings_page');
   //$debug_page  = add_submenu_page( 'query-wrangler', 'Debug', 'Debug', 'manage_options', 'qw-debug', 'qw_debug');
 }
-// add menu very last so we don't get replaced by another menu item
-add_action( 'admin_menu', 'qw_menu', 9999);
 
 /*
  * Shortcode support for all queries
  */
 function qw_single_query_shortcode($atts) {
-  $short_array = shortcode_atts(array('id' => ''), $atts);
+  $short_array = shortcode_atts(array('id' => '', 'slug' => ''), $atts);
   extract($short_array);
-
+  
+  if (!$id && $slug){
+    $id = qw_get_query_by_slug($slug);
+  }
   $themed = qw_execute_query($id);
   return $themed;
 }
@@ -205,7 +208,7 @@ function qw_query_override_terms_table(){
   dbDelta($sql);
 }
 register_activation_hook(__FILE__,'qw_query_override_terms_table');
-//
+/*/
 function _d($v){
   print '<hr/><pre>'.print_r($v,1).'</pre>';
 }

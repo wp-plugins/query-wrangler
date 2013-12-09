@@ -20,7 +20,7 @@ function qw_execute_query($query_id, $options_override = array(), $reset_post_da
 
   // set the new query
   $qw_query = new WP_Query($args);
-
+  
   // pre_render hook
   do_action_ref_array('qw_pre_render', array(&$options));
 
@@ -88,14 +88,24 @@ function qw_generate_query_options($query_id, $options_override = array(), $full
  * $param array $options_override can change the options array
  * @return array Query Arguments
  */
-function qw_generate_query_args($options = array(), $options_override = array())
+function qw_generate_query_args($options = array())
 {
   $all_filters = qw_all_filters();
   $all_sorts = qw_all_sort_options();
   $handlers = qw_preprocess_handlers($options);
   
+  $paged = NULL;
+  // if pager_key is enabled, trick qw_get_page_number
+  if (isset($options['display']['page']['pager']['use_pager_key']) &&
+      isset($options['display']['page']['pager']['pager_key']) &&
+      isset($_GET[$options['display']['page']['pager']['pager_key']]) &&
+      is_numeric($_GET[$options['display']['page']['pager']['pager_key']]))
+  {
+    $paged = $_GET[$options['display']['page']['pager']['pager_key']];
+  }
+  
   // standard arguments
-  $args['paged'] = qw_get_page_number();  
+  $args['paged'] = ($paged) ? $paged : qw_get_page_number();  
   $args['posts_per_page'] = ($options['args']['posts_per_page']) ? $options['args']['posts_per_page']: 5;
   $args['offset']         = ($options['args']['offset']) ? $options['args']['offset']: 0;
   $args['post_status']    = $options['args']['post_status'];
@@ -187,6 +197,13 @@ function qw_generate_query_args($options = array(), $options_override = array())
   return $args;
 }
 
+/*
+ *
+ */
+function qw_get_query_by_slug($slug){
+  global $wpdb;
+  return $wpdb->get_var($wpdb->prepare("SELECT id FROM ".$wpdb->prefix."query_wrangler WHERE `slug` = '%s'",$slug));
+}
 /*
  * Get all queries of the type widget
  *
