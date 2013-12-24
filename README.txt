@@ -59,6 +59,10 @@ Select a category or multiple categories to override.   Save the query, then vis
 
 == Changelog ==
 
+= 1.5rc19 =
+
+* Feature: New author filter
+
 = 1.5rc18 =
 
 * Fix: Pagination bug when using Page numbers.
@@ -199,4 +203,4 @@ Select a category or multiple categories to override.   Save the query, then vis
 
 == Upgrade Notice ==
 
-1.5rc18  Fix Pager pagination with Page Numbers bug
+1.5rc19  New author filter
