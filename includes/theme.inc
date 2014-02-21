@@ -72,6 +72,7 @@ function qw_templates($templates){
     'default_path' => QW_PLUGIN_DIR,
     'arguments' => array(
       'slug' => '',
+      'options' => array(),
     )
   );
   // full and field styles
@@ -202,6 +203,7 @@ function qw_template_query(&$qw_query, $options)
   // start building theme arguments
   $wrapper_args = array(
     'slug' => $options['meta']['slug'],
+    'options' => $options,
   );
 
   // look for empty results

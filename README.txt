@@ -59,6 +59,10 @@ Select a category or multiple categories to override.   Save the query, then vis
 
 == Changelog ==
 
+= 1.5rc20 =
+
+* Updating template wrangler to use apply_filters instead of do_action_ref_array
+
 = 1.5rc19 =
 
 * Feature: New author filter
@@ -203,4 +207,4 @@ Select a category or multiple categories to override.   Save the query, then vis
 
 == Upgrade Notice ==
 
-1.5rc19  New author filter
+1.5rc20  Improvements to template wrangler for custom template suggestions
