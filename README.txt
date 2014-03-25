@@ -59,6 +59,10 @@ Select a category or multiple categories to override.   Save the query, then vis
 
 == Changelog ==
 
+= 1.5rc22 =
+
+* Bug fix: Empty request_uri causing issues.
+
 = 1.5rc21 =
 
 * New: Field - Featured Image
@@ -217,4 +221,4 @@ Select a category or multiple categories to override.   Save the query, then vis
 
 == Upgrade Notice ==
 
-1.5rc21 Some exposed filters, new featured image field, fix for image styles, and new setting for live preview.
+1.5rc22 Bug with page routing

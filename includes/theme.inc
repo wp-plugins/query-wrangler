@@ -404,7 +404,7 @@ function qw_make_fields_rows(&$qw_query, $options)
         $rows[$i]['fields'][$field_name]['output'] = do_shortcode($rows[$i]['fields'][$field_name]['output']);
 
         // after all operations, remove if excluded
-        if($field_settings['exclude_display']){
+        if(isset($field_settings['exclude_display'])){
           unset($rows[$i]['fields'][$field_name]['output']);
         }
       }
