@@ -266,7 +266,13 @@ function qw_template_query(&$qw_query, $options)
     // pager
     $wrapper_args['pager'] = qw_make_pager($options['display']['page']['pager'], $qw_query);
   }
-
+  
+  // exposed filters
+  $exposed = qw_generate_exposed_handlers($options);
+  if(!empty($exposed)){
+    $wrapper_args['exposed'] =  $exposed;
+  }
+  
   // template with wrapper
   return theme('query_display_wrapper', $wrapper_args);
 }

@@ -190,7 +190,7 @@ function qw_all_post_types(){
   $post_types = apply_filters('qw_post_types', array());
 
   // Get all verified post types
-  $post_types = get_post_types(array('public' => true, '_builtin' => false), 'names', 'and');
+  $post_types += get_post_types(array('public' => true, '_builtin' => false), 'names', 'and');
   // Add standard types
   $post_types['post'] = 'post';
   $post_types['page'] = 'page';

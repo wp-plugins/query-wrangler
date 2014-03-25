@@ -59,6 +59,16 @@ Select a category or multiple categories to override.   Save the query, then vis
 
 == Changelog ==
 
+= 1.5rc21 =
+
+* New: Field - Featured Image
+* New: Exposed filter - Post IDs
+* New: Exposed filter - Post Parent
+* New: Exposed filter - Post Types
+* New: Exposed filter - Taxonomies
+* New: Setting - Live Preview default
+* Fix: Image field style setting
+
 = 1.5rc20 =
 
 * Updating template wrangler to use apply_filters instead of do_action_ref_array
@@ -207,4 +217,4 @@ Select a category or multiple categories to override.   Save the query, then vis
 
 == Upgrade Notice ==
 
-1.5rc20  Improvements to template wrangler for custom template suggestions
+1.5rc21 Some exposed filters, new featured image field, fix for image styles, and new setting for live preview.

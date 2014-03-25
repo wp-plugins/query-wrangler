@@ -109,13 +109,15 @@ function qw_generate_query_args($options = array())
   $args['posts_per_page'] = ($options['args']['posts_per_page']) ? $options['args']['posts_per_page']: 5;
   $args['offset']         = ($options['args']['offset']) ? $options['args']['offset']: 0;
   $args['post_status']    = $options['args']['post_status'];
-
+  
+  $submitted_data = qw_exposed_submitted_data();
+  
   foreach ($handlers as $handler_type => $handler)
   {
     if (is_array($handler['items'])){
       foreach($handler['items'] as $name => $item)
       {
-        /*/ Exposed items
+        // Exposed items
         if (isset($item['exposed_form'])){
           if(!empty($item['values']['exposed_key'])){
             // override exposed key
@@ -139,7 +141,7 @@ function qw_generate_query_args($options = array())
           $args[$item['order_key']] = $item['values']['order_value'];
         }
 
-        /*/ Process submitted exposed values
+        // Process submitted exposed values
         // exposed items
         if(isset($item['values']['is_exposed']) && function_exists($item['exposed_process'])){
           $value = $submitted_data[$item['exposed_key']];
@@ -150,50 +152,6 @@ function qw_generate_query_args($options = array())
     }
   }
   
-  /*/ handle sorts
-  if(is_array($options['args']['sorts'])){
-
-    foreach($options['args']['sorts'] as $sort)
-    {
-      $hook_key = qw_get_hook_key($all_sorts, $sort);
-      // combine sort details
-      if (isset($all_sorts[$hook_key])){
-        $sort = array_merge($all_sorts[$hook_key], $sort);
-      }
-
-      // look for callback, and run it
-      if (isset($sort['query_args_callback']) && function_exists($sort['query_args_callback'])){
-        $sort['query_args_callback']($args, $sort);
-      } else {
-        // else, default to type as WP_Query argument key
-        // arguments passed to query
-        $args[$sort['orderby_key']] = $sort['type'];
-        $args[$sort['order_key']] = $sort['order_value'];
-      }
-    }
-  }
-
-  // handle filters
-  if(is_array($options['args']['filters'])){
-    // loop through all filters
-    foreach($options['args']['filters'] as $filter)
-    {
-      $hook_key = qw_get_hook_key($all_filters, $filter);
-      // combine filter details
-      if (isset($all_filters[$hook_key])){
-        $filter = array_merge($all_filters[$hook_key], $filter);
-      }
-
-      // look for callback, and run it
-      if (isset($filter['query_args_callback']) && function_exists($filter['query_args_callback'])){
-        $filter['query_args_callback']($args, $filter);
-      } else {
-        // else, default to type as WP_Query argument key
-        $args[$filter['type']] = $filter[$filter['type']];
-      }
-    }
-  }
-  */
   return $args;
 }
 

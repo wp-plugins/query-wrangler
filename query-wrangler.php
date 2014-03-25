@@ -3,13 +3,13 @@
 
 ******************************************************************
 
-Contributors:      daggerhart, forrest.livengood
+Contributors:      daggerhart
 Plugin Name:       Query Wrangler
 Plugin URI:        http://www.widgetwrangler.com/query-wrangler
 Description:       Query Wrangler provides an intuitive interface for creating complex WP queries as pages or widgets. Based on Drupal Views.
-Author:            Jonathan Daggerhart, Forrest Livengood
+Author:            Jonathan Daggerhart
 Author URI:        http://www.websmiths.co
-Version:           1.5rc20
+Version:           1.5rc21
 
 ******************************************************************
 
@@ -48,7 +48,7 @@ function qw_init_frontend(){
   }
   // Wordpress hooks
   include_once QW_PLUGIN_DIR.'/includes/hooks.inc';
-  
+  include_once QW_PLUGIN_DIR.'/includes/exposed.inc';
   include_once QW_PLUGIN_DIR.'/includes/handlers.inc';
   
   //include_once QW_PLUGIN_DIR.'/includes/data.defaults.inc';
@@ -74,6 +74,7 @@ function qw_init_frontend(){
   include_once QW_PLUGIN_DIR.'/includes/fields/file_attachment.inc';
   include_once QW_PLUGIN_DIR.'/includes/fields/image_attachment.inc';
   include_once QW_PLUGIN_DIR.'/includes/fields/meta_value.inc';
+  include_once QW_PLUGIN_DIR.'/includes/fields/featured_image.inc';
   
   //include_once QW_PLUGIN_DIR.'/includes/data.default_filters.inc';
   include_once QW_PLUGIN_DIR.'/includes/filters/author.inc';
@@ -102,6 +103,9 @@ function qw_init(){
   // admin only
   if(is_admin())
   {
+    if (get_option('qw_live_preview') === FALSE){
+      add_option('qw_live_preview', 'on');
+    }
     include_once QW_PLUGIN_DIR.'/includes/query-admin.inc';
     include_once QW_PLUGIN_DIR.'/includes/query-admin-pages.inc';
     include_once QW_PLUGIN_DIR.'/includes/ajax.inc';
@@ -163,7 +167,7 @@ function qw_menu()
  * Shortcode support for all queries
  */
 function qw_single_query_shortcode($atts) {
-  $short_array = shortcode_atts(array('id' => '', 'slug' => ''), $atts);
+  $short_array = shortcode_atts(array('id' => '', 'slug' => '', 'args' => ''), $atts);
   extract($short_array);
   
   if (!$id && $slug){
@@ -182,7 +186,7 @@ function qw_query_wrangler_table(){
   global $wpdb;
   $table_name = $wpdb->prefix."query_wrangler";
   $sql = "CREATE TABLE " . $table_name . " (
-	  id mediumint(9) NOT NULL AUTO_INCREMENT,
+	 id mediumint(9) NOT NULL AUTO_INCREMENT,
    name varchar(255) NOT NULL,
    slug varchar(255) NOT NULL,
    type varchar(16) NOT NULL,
