@@ -20,7 +20,7 @@ function qw_execute_query($query_id, $options_override = array(), $reset_post_da
 
   // set the new query
   $qw_query = new WP_Query($args);
-
+  
   // pre_render hook
   do_action_ref_array('qw_pre_render', array(&$options));
 
@@ -88,63 +88,80 @@ function qw_generate_query_options($query_id, $options_override = array(), $full
  * $param array $options_override can change the options array
  * @return array Query Arguments
  */
-function qw_generate_query_args($options = array(), $options_override = array())
+function qw_generate_query_args($options = array())
 {
   $all_filters = qw_all_filters();
   $all_sorts = qw_all_sort_options();
-
+  $handlers = qw_preprocess_handlers($options);
+  
+  $paged = NULL;
+  // if pager_key is enabled, trick qw_get_page_number
+  if (isset($options['display']['page']['pager']['use_pager_key']) &&
+      isset($options['display']['page']['pager']['pager_key']) &&
+      isset($_GET[$options['display']['page']['pager']['pager_key']]) &&
+      is_numeric($_GET[$options['display']['page']['pager']['pager_key']]))
+  {
+    $paged = $_GET[$options['display']['page']['pager']['pager_key']];
+  }
+  
   // standard arguments
-  $args['paged'] = qw_get_page_number();  
+  $args['paged'] = ($paged) ? $paged : qw_get_page_number();  
   $args['posts_per_page'] = ($options['args']['posts_per_page']) ? $options['args']['posts_per_page']: 5;
   $args['offset']         = ($options['args']['offset']) ? $options['args']['offset']: 0;
   $args['post_status']    = $options['args']['post_status'];
+  
+  $submitted_data = qw_exposed_submitted_data();
+  
+  foreach ($handlers as $handler_type => $handler)
+  {
+    if (is_array($handler['items'])){
+      foreach($handler['items'] as $name => $item)
+      {
+        // Exposed items
+        if (isset($item['exposed_form'])){
+          if(!empty($item['values']['exposed_key'])){
+            // override exposed key
+            $item['exposed_key'] = $item['values']['exposed_key'];
+          } else {
+            // default exposed key
+            $item['exposed_key'] = 'exposed_'.$item['values']['name'];
+          }
+        }
+        // */
+        
+        // Alter the query args
+        // look for callback, and run it
+        if (isset($item['query_args_callback']) && function_exists($item['query_args_callback'])){
+          $item['query_args_callback']($args, $item);
+        }
+        else if (isset($item['orderby_key']) && isset($item['order_key'])){
+          // else, default to type as WP_Query argument key
+          // arguments passed to query
+          $args[$item['orderby_key']] = $item['type'];
+          $args[$item['order_key']] = $item['values']['order_value'];
+        }
 
-  // handle sorts
-  if(is_array($options['args']['sorts'])){
-
-    foreach($options['args']['sorts'] as $sort)
-    {
-      $hook_key = qw_get_hook_key($all_sorts, $sort);
-      // combine sort details
-      if (isset($all_sorts[$hook_key])){
-        $sort = array_merge($all_sorts[$hook_key], $sort);
-      }
-
-      // look for callback, and run it
-      if (isset($sort['query_args_callback']) && function_exists($sort['query_args_callback'])){
-        $sort['query_args_callback']($args, $sort);
-      } else {
-        // else, default to type as WP_Query argument key
-        // arguments passed to query
-        $args[$sort['orderby_key']] = $sort['type'];
-        $args[$sort['order_key']] = $sort['order_value'];
-      }
-    }
-  }
-
-  // handle filters
-  if(is_array($options['args']['filters'])){
-    // loop through all filters
-    foreach($options['args']['filters'] as $filter)
-    {
-      $hook_key = qw_get_hook_key($all_filters, $filter);
-      // combine filter details
-      if (isset($all_filters[$hook_key])){
-        $filter = array_merge($all_filters[$hook_key], $filter);
-      }
-
-      // look for callback, and run it
-      if (isset($filter['query_args_callback']) && function_exists($filter['query_args_callback'])){
-        $filter['query_args_callback']($args, $filter);
-      } else {
-        // else, default to type as WP_Query argument key
-        $args[$filter['type']] = $filter[$filter['type']];
+        // Process submitted exposed values
+        // exposed items
+        if(isset($item['values']['is_exposed']) && function_exists($item['exposed_process'])){
+          $value = $submitted_data[$item['exposed_key']];
+          $item['exposed_process']($args, $item, $value);
+        }
+        //*/
       }
     }
   }
+  
   return $args;
 }
 
+/*
+ *
+ */
+function qw_get_query_by_slug($slug){
+  global $wpdb;
+  return $wpdb->get_var($wpdb->prepare("SELECT id FROM ".$wpdb->prefix."query_wrangler WHERE `slug` = '%s'",$slug));
+}
 /*
  * Get all queries of the type widget
  *

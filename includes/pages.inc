@@ -134,6 +134,11 @@ function qw_execute_query_page(){
   // get current page query-like path
   $path = qw_get_path();
 
+  // make sure a path exists
+  if (empty($path)){
+    return;
+  }    
+  
   // fix the query paging
   if($paged = qw_get_page_number($wp_query)){
     $wp_query->query_vars['paged'] = $paged;

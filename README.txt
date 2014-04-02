@@ -56,9 +56,48 @@ Select a category or multiple categories to override.   Save the query, then vis
 == Screenshots ==
 
 1. Drupal Views Editor Theme
-1. Tabs Editor Theme
 
 == Changelog ==
+
+= 1.5rc22 =
+
+* Bug fix: Empty request_uri causing issues.
+
+= 1.5rc21 =
+
+* New: Field - Featured Image
+* New: Exposed filter - Post IDs
+* New: Exposed filter - Post Parent
+* New: Exposed filter - Post Types
+* New: Exposed filter - Taxonomies
+* New: Setting - Live Preview default
+* Fix: Image field style setting
+
+= 1.5rc20 =
+
+* Updating template wrangler to use apply_filters instead of do_action_ref_array
+
+= 1.5rc19 =
+
+* Feature: New author filter
+
+= 1.5rc18 =
+
+* Fix: Pagination bug when using Page numbers.
+
+= 1.5rc17 =
+
+* Fix: post_parent filter
+
+= 1.5rc16 =
+
+* Feature: New taxonomies filter
+* Feature: Featured Image setting for "Image Attachment" field
+* Fix: Making js better
+* Fix: New handler item weight bug
+* Fix: New field tokens bug
+* Remove: tabs editor
+* Refactoring a lot
 
 = 1.5rc15 =
 
@@ -182,4 +221,4 @@ Select a category or multiple categories to override.   Save the query, then vis
 
 == Upgrade Notice ==
 
-1.5rc15 Fixing compatibility issue with Widget Wrangler.  This upgrade is not necessary if not using Widget Wrangler.
+1.5rc22 Bug with page routing
