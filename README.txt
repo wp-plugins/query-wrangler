@@ -42,7 +42,7 @@ Some examples of how you would use this plugin include:
 Easy, the code you're looking for is like this.   [query id=2] , where the number 2 is the query id. This can be found on the Query Wrangler page eside each query.
 
 * By slug: [query slug="my-query"]
-* Customize WP_Query arguments: [query id=2" args="posts_per_page=1&post_type=page"]
+* Customize WP_Query arguments: [query id=2 args="posts_per_page=1&post_type=page"]
 
 
 = What are overrides and how do I use them? =
