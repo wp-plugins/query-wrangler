@@ -155,6 +155,9 @@ function qw_all_styles(){
  */
 function qw_all_row_styles(){
   $row_styles = apply_filters('qw_row_styles', array());
+  foreach ($row_styles as $k => $row_style){
+    $row_styles[$k]['hook_key'] = $k;
+  }
   return $row_styles;
 }
 

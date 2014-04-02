@@ -218,9 +218,12 @@ function qw_template_query(&$qw_query, $options)
       'template' => 'query-'.$style['hook_key'],
       'slug' => $options['meta']['slug'],
       'style' => $style['hook_key'],
-      'style_settings' => $options['display'][$style['settings_key']],
       'options' => $options,
     );
+    if (isset($options['display'][$style['settings_key']])){
+      
+      $template_args['style_settings'] = $options['display'][$style['settings_key']];
+    }
 
     // the content of the widget is the result of the query
     if($options['display']['row_style'] == "posts") {
@@ -349,6 +352,7 @@ function qw_make_fields_rows(&$qw_query, $options)
         $field_classes = array('query-field');
         $field_classes[] = 'query-field-'.$field_settings['name'];
 
+        $rows[$i]['fields'][$field_name]['output'] = '';
         $rows[$i]['fields'][$field_name]['classes'] = implode(" ",$field_classes);
 
         // get field details from all fields list
@@ -356,12 +360,12 @@ function qw_make_fields_rows(&$qw_query, $options)
 
         // merge default data with values
         $field = array_merge($field_defaults, $field_settings);
-
+        
         // look for callback
         if(isset($field_defaults['output_callback']))
         {
           // callbacks with token arguments
-          if ($field_defaults['output_arguments']){
+          if (isset($field_defaults['output_arguments'])){
             $rows[$i]['fields'][$field_name]['output'].= $field_defaults['output_callback']($this_post, $field);
           }
           // normal callback w/o arguments
@@ -390,7 +394,7 @@ function qw_make_fields_rows(&$qw_query, $options)
         }
         
         // get default field label for tables
-        $rows[$i]['fields'][$field_name]['label'] = ($field_settings['has_label']) ? $field_settings['label'] : '';
+        $rows[$i]['fields'][$field_name]['label'] = (isset($field_settings['has_label'])) ? $field_settings['label'] : '';
 
         // apply labels to full style fields
         if(isset($field_settings['has_label']) &&

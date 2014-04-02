@@ -9,7 +9,7 @@ Plugin URI:        http://www.widgetwrangler.com/query-wrangler
 Description:       Query Wrangler provides an intuitive interface for creating complex WP queries as pages or widgets. Based on Drupal Views.
 Author:            Jonathan Daggerhart
 Author URI:        http://www.websmiths.co
-Version:           1.5rc22
+Version:           1.5.23
 
 ******************************************************************
 
@@ -106,10 +106,10 @@ function qw_init(){
     if (get_option('qw_live_preview') === FALSE){
       add_option('qw_live_preview', 'on');
     }
-    include_once QW_PLUGIN_DIR.'/includes/query-admin.inc';
-    include_once QW_PLUGIN_DIR.'/includes/query-admin-pages.inc';
-    include_once QW_PLUGIN_DIR.'/includes/ajax.inc';
-    include_once QW_PLUGIN_DIR.'/includes/default_editors.inc';
+    include_once QW_PLUGIN_DIR.'/admin/query-admin.inc';
+    include_once QW_PLUGIN_DIR.'/admin/query-admin-pages.inc';
+    include_once QW_PLUGIN_DIR.'/admin/ajax.inc';
+    include_once QW_PLUGIN_DIR.'/admin/default_editors.inc';
 
     add_action( 'wp_ajax_nopriv_qw_form_ajax', 'qw_form_ajax' );
     add_action( 'wp_ajax_qw_form_ajax', 'qw_form_ajax' );
@@ -173,7 +173,13 @@ function qw_single_query_shortcode($atts) {
   if (!$id && $slug){
     $id = qw_get_query_by_slug($slug);
   }
-  $themed = qw_execute_query($id);
+  
+  $options_override = array();
+  if (isset($args) && !empty($args)){
+    $options_override['shortcode_args'] = html_entity_decode($args);
+  }
+  
+  $themed = qw_execute_query($id, $options_override);
   return $themed;
 }
 add_shortcode('query','qw_single_query_shortcode');

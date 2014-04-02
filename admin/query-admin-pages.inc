@@ -110,6 +110,8 @@ function qw_edit_query_form(){
     'all_filters'   => qw_all_filters(),
     'all_fields'    => qw_all_fields(),
     'all_sorts'     => qw_all_sort_options(),
+    'image_sizes'   => get_intermediate_image_sizes(),
+    'file_styles'   => qw_all_file_styles(),
   );
 
   // Page Queries

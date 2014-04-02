@@ -8,21 +8,31 @@
  * @return string Can return a string of html based on parameter $return
  */
 function qw_execute_query($query_id, $options_override = array(), $reset_post_data = true)
-{
+{  
   // get the query options
   $options = qw_generate_query_options($query_id, $options_override);
 
   // get formatted query arguments
   $args = qw_generate_query_args($options);
+  
+  $options =  array_merge_recursive((array)$options, $options_override);
 
   // pre_query hook
-  do_action_ref_array('qw_pre_query', array(&$args));
-
+  $args = apply_filters('qw_pre_query', $args);
+  //do_action_ref_array('qw_pre_query', array(&$args));
+  
+  // shortcodes can change the arguments
+  if (isset($options_override['shortcode_args'])){
+    $shortcode_args = wp_parse_args($options_override['shortcode_args']);
+    $args =  array_merge_recursive((array)$args, $shortcode_args);
+  }
+  
   // set the new query
   $qw_query = new WP_Query($args);
   
   // pre_render hook
-  do_action_ref_array('qw_pre_render', array(&$options));
+  $options = apply_filters('qw_pre_query', $options);
+  //do_action_ref_array('qw_pre_render', array(&$options));
 
   // get the themed content
   $themed = qw_template_query($qw_query, $options);
