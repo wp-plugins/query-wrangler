@@ -10,15 +10,19 @@ Query Wrangler provides an intuitive interface for creating complex WP queries a
 
 == Description ==
 
-This plugin lets you create new WP queries widgets and use shortcodes for queries on your pages.  It also allows you to override the way category and tag pages display.
+This plugin lets you create new WP queries as widgets and use shortcodes for queries on your pages.  It also allows you to override the way category and tag pages display.
 
 Query Wrangler's interface is highly intuitive way to create queries and will be second nature for any Drupal Views user.
 
 This plugin will bring extreme flexibility to WordPress users with its ability to create custom queries using the WP_Query class with a user interface.
 
-Additional Plugins
+Supports:
 
-* [Query Slideshow](http://wordpress.org/extend/plugins/query-slideshow/ "Query Slideshow") - Turn your queries into slideshows using jquery.cycle
+* Most post data, including meta fields
+* Taxonomy data
+* Advanced Custom Fields
+* Custom Content Type Manager
+* Some exposed filters
 
 Some examples of how you would use this plugin include:
 
@@ -29,11 +33,17 @@ Some examples of how you would use this plugin include:
 
 [Introduction to Query Wrangler](http://www.widgetwrangler.com/forum/query-wrangler/general/intro-query-wrangler "Learn to setup Queries")
 
+
+Additional Plugins
+
+* [Query Slideshow](http://wordpress.org/extend/plugins/query-slideshow/ "Query Slideshow") - Turn your queries into slideshows using jquery.cycle
+
+
 == Installation ==
 
 1. Upload `query-wrangler` to the `/wp-content/plugins/` directory
 1. Activate the plugin
-1. Visit the Query Wrangler Menu to being Creating your custom queries
+1. Visit the Query Wrangler Menu to begin creating your custom queries
 
 == Frequently Asked Questions ==
 
@@ -43,6 +53,11 @@ Easy, the code you're looking for is like this.   [query id=2] , where the numbe
 
 * By slug: [query slug="my-query"]
 * Customize WP_Query arguments: [query id=2 args="posts_per_page=1&post_type=page"]
+
+
+= How do I create my own custom field display? =
+
+Example: https://gist.github.com/daggerhart/10417309
 
 
 = What are overrides and how do I use them? =

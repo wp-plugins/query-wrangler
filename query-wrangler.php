@@ -212,7 +212,8 @@ function qw_query_override_terms_table(){
   $table_name = $wpdb->prefix."query_override_terms";
   $sql = "CREATE TABLE " . $table_name . " (
 	  query_id mediumint(9) NOT NULL,
-   term_id bigint(20) NOT NULL
+   term_id bigint(20) NOT NULL,
+   UNIQUE KEY `query_term` (`query_id`,`term_id`)
 	);";
 
   require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
