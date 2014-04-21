@@ -77,7 +77,7 @@ Select a category or multiple categories to override.   Save the query, then vis
 = 1.5.24 =
 
 * New: Callback field - Use any function to provide a field value.
-* New: Shortcode argument contextual tokens.  eg, [query id=1 args="author={{post:post_author}}&post_type={{post:post_type}}"]  - retturns the query showing only posts by the author of the current page being viewed, and of the post type of the current post_type being viewed.
+* New: Shortcode argument contextual tokens.  eg, [query id=1 args="author={{post:post_author}}&post_type={{post:post_type}}"]  - returns the query showing only posts by the author of the current page being viewed, and of the post type of the current post_type being viewed.
 * Fix: index on query_override_terms table
 
 = 1.5.23 =
