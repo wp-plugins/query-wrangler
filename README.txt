@@ -56,9 +56,12 @@ Easy, the code you're looking for is like this.   [query id=2] , where the numbe
 * Customize WP_Query arguments with contextual data: [query id=1 args="author={{post:post_author}}&post_type={{post:post_type}}"]
 
 
-= How do I create my own custom field display? =
+= Developer & Usage =
 
-Example: https://gist.github.com/daggerhart/10417309
+* [Custom field example](https://gist.github.com/daggerhart/10417309 "Custom field example")
+* [Callback field usage](http://wordpress.org/support/topic/add-php-in-rewrite-output-of-this-field?replies=3#post-5480638 "Callback field usage")
+* [Meta Field Display Handler: Custom Content Type Manager](http://wordpress.org/support/topic/cant-put-php-code-into-rewrite-results-field?replies=4#post-5411970 "Meta Field Display Handler: Custom Content Type Manager")
+* [Meta Field Display Handler: Advanced Custom Fields](https://wordpress.org/support/topic/how-to-get-he-image-url-instead-of-image-id?replies=5#post-5411991 "Meta Field Display Handler: Advanced Custom Fields")
 
 
 = What are overrides and how do I use them? =
