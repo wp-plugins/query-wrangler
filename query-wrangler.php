@@ -9,7 +9,7 @@ Plugin URI:        http://www.widgetwrangler.com/query-wrangler
 Description:       Query Wrangler provides an intuitive interface for creating complex WP queries as pages or widgets. Based on Drupal Views.
 Author:            Jonathan Daggerhart
 Author URI:        http://www.websmiths.co
-Version:           1.5.23
+Version:           1.5.24
 
 ******************************************************************
 
@@ -75,6 +75,7 @@ function qw_init_frontend(){
   include_once QW_PLUGIN_DIR.'/includes/fields/image_attachment.inc';
   include_once QW_PLUGIN_DIR.'/includes/fields/meta_value.inc';
   include_once QW_PLUGIN_DIR.'/includes/fields/featured_image.inc';
+  include_once QW_PLUGIN_DIR.'/includes/fields/callback_field.inc';
   
   //include_once QW_PLUGIN_DIR.'/includes/data.default_filters.inc';
   include_once QW_PLUGIN_DIR.'/includes/filters/author.inc';
@@ -176,6 +177,9 @@ function qw_single_query_shortcode($atts) {
   
   $options_override = array();
   if (isset($args) && !empty($args)){
+    if (stripos($args, '{{') !== false){
+      $args = qw_contextual_tokens_replace($args);
+    }
     $options_override['shortcode_args'] = html_entity_decode($args);
   }
   

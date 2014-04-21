@@ -1,9 +1,9 @@
 === Query Wrangler ===
-Contributors: daggerhart, forrest.livengood
+Contributors: daggerhart
 Donate link: http://www.widgetwrangler.com/
-Tags: query, pages, widget, admin, widgets, administration, manage, views
+Tags: query, pages, widget, admin, widgets, administration, manage, views, loop
 Requires at least: 3
-Tested up to: 3.7.1
+Tested up to: 3.9
 Stable tag: trunk
 
 Query Wrangler provides an intuitive interface for creating complex WP queries as shortcodes and widgets. UI based on Drupal Views.
@@ -53,6 +53,7 @@ Easy, the code you're looking for is like this.   [query id=2] , where the numbe
 
 * By slug: [query slug="my-query"]
 * Customize WP_Query arguments: [query id=2 args="posts_per_page=1&post_type=page"]
+* Customize WP_Query arguments with contextual data: [query id=1 args="author={{post:post_author}}&post_type={{post:post_type}}"]
 
 
 = How do I create my own custom field display? =
@@ -72,6 +73,12 @@ Select a category or multiple categories to override.   Save the query, then vis
 1. Drupal Views Editor Theme
 
 == Changelog ==
+
+= 1.5.24 =
+
+* New: Callback field - Use any function to provide a field value.
+* New: Shortcode argument contextual tokens.  eg, [query id=1 args="author={{post:post_author}}&post_type={{post:post_type}}"]  - retturns the query showing only posts by the author of the current page being viewed, and of the post type of the current post_type being viewed.
+* Fix: index on query_override_terms table
 
 = 1.5.23 =
 
@@ -241,4 +248,4 @@ Select a category or multiple categories to override.   Save the query, then vis
 
 == Upgrade Notice ==
 
-1.5.23 Features: Shortcode arguments, field support for "Advanced Custom Fields" and "Custom Content Type Manager" plugins.
+1.5.24 Features: Shortcode argument contextual tokens, Custom callback field.
