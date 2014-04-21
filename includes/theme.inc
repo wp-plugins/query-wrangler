@@ -366,7 +366,7 @@ function qw_make_fields_rows(&$qw_query, $options)
         {
           // callbacks with token arguments
           if (isset($field_defaults['output_arguments'])){
-            $rows[$i]['fields'][$field_name]['output'].= $field_defaults['output_callback']($this_post, $field);
+            $rows[$i]['fields'][$field_name]['output'].= $field_defaults['output_callback']($this_post, $field, $tokens);
           }
           // normal callback w/o arguments
           else {

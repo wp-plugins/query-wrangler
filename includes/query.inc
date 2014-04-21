@@ -404,6 +404,34 @@ function qw_get_meta_keys() {
 }
 
 /*
+ * Replace contextual tokens within a string
+ *
+ * @params string $args - a query argument string
+ *
+ * @return string - query argument string with tokens replaced with values
+ */
+function qw_contextual_tokens_replace($args){
+  $matches = array();
+  preg_match_all('/{{([^}]*)}}/', $args, $matches);
+  if (isset($matches[1])){
+    global $post;
+    
+    foreach ($matches[1] as $i => $context_token){
+      if (stripos($context_token, ':') !== false){
+        $a = explode(':', $context_token);
+        if ($a[0] == 'post' && isset($post->{$a[1]})){
+          $args = str_replace($matches[0][$i], $post->{$a[1]}, $args);
+        }
+        else if ($a[0] == 'query_var' && $replace = get_query_var($a[1])){
+          $args = str_replace($matches[0][$i], $replace, $args);
+        }
+      }
+    }
+  }
+  return $args;
+}
+
+/*
  * usort callback. I likely stole this from somewhere.. like php.net
  */
 function qw_cmp($a,$b) {
