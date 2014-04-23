@@ -59,7 +59,8 @@ Easy, the code you're looking for is like this.   [query id=2] , where the numbe
 = Developer & Usage =
 
 * [Custom field example](https://gist.github.com/daggerhart/10417309 "Custom field example")
-* [Callback field usage](http://wordpress.org/support/topic/add-php-in-rewrite-output-of-this-field?replies=3#post-5480638 "Callback field usage")
+* [Callback field usage: wp_get_attachment_url](http://wordpress.org/support/topic/add-php-in-rewrite-output-of-this-field?replies=3#post-5480638 "Callback field usage")
+* [Callback field usage: the_tags](http://wordpress.org/support/topic/callback-field-plugin-version-1524?replies=1#post-5487515 "Callback field usage 2")
 * [Meta Field Display Handler: Custom Content Type Manager](http://wordpress.org/support/topic/cant-put-php-code-into-rewrite-results-field?replies=4#post-5411970 "Meta Field Display Handler: Custom Content Type Manager")
 * [Meta Field Display Handler: Advanced Custom Fields](https://wordpress.org/support/topic/how-to-get-he-image-url-instead-of-image-id?replies=5#post-5411991 "Meta Field Display Handler: Advanced Custom Fields")
 
