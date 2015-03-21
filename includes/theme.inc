@@ -13,12 +13,20 @@ function qw_templates($templates){
     'default_path' => QW_PLUGIN_DIR,
     'arguments' => array('options' => NULL),
   );
-  // edit query template
-  $templates['query_edit'] = array(
-    'files' => 'admin/editors/[theme]/query-edit-[theme].inc',
+  // edit query wrapper template
+  $templates['query_edit_wrapper'] = array(
+    'files' => 'admin/wrapper-editor.inc',
     'default_path' => QW_PLUGIN_DIR,
     'arguments' => array(
-      'theme' => get_option('qw_edit_theme'),
+      'theme' => get_option('qw_edit_theme', QW_DEFAULT_THEME),
+    ),
+  );
+  // edit query template
+  $templates['query_edit'] = array(
+    'files' => 'admin/editors/[theme]/[theme]-editor.inc',
+    'default_path' => QW_PLUGIN_DIR,
+    'arguments' => array(
+      'theme' => get_option('qw_edit_theme', QW_DEFAULT_THEME),
     ),
   );
   // create query template
@@ -198,6 +206,7 @@ function theme_query_display_style_preprocess($template)
 function qw_template_query(&$qw_query, $options)
 {
   $results_count = count($qw_query->posts);
+  $options['meta']['results_count'] = $results_count;
   $content = '';
 
   // start building theme arguments
@@ -378,6 +387,9 @@ function qw_make_fields_rows(&$qw_query, $options)
           $rows[$i]['fields'][$field_name]['output'].= $this_post->{$field_settings['type']};
         }
 
+        // remember if any value was found
+        $empty = empty($rows[$i]['fields'][$field_name]['output']);
+
         // add token for replace
         $tokens['{{'.$field_name.'}}'] = $rows[$i]['fields'][$field_name]['output'];
 
@@ -404,11 +416,20 @@ function qw_make_fields_rows(&$qw_query, $options)
           $rows[$i]['fields'][$field_name]['output'] = '<label class="query-label">'.$field_settings['label'].'</label> '.$rows[$i]['fields'][$field_name]['output'];
         }
 
-        // apply shortcodes to field output
-        $rows[$i]['fields'][$field_name]['output'] = do_shortcode($rows[$i]['fields'][$field_name]['output']);
+        // the_content filter
+        if (isset($field_settings['apply_the_content'])) {
+          $rows[$i]['fields'][$field_name]['output'] = apply_filters('the_content', $rows[$i]['fields'][$field_name]['output']);
+        }
+        else {
+          // apply shortcodes to field output
+          $rows[$i]['fields'][$field_name]['output'] = do_shortcode($rows[$i]['fields'][$field_name]['output']);
+        }
+
+        // hide if empty
+        $hide = (isset($field_settings['hide_if_empty']) && $empty);
 
         // after all operations, remove if excluded
-        if(isset($field_settings['exclude_display'])){
+        if(isset($field_settings['exclude_display']) || $hide ){
           unset($rows[$i]['fields'][$field_name]['output']);
         }
       }
