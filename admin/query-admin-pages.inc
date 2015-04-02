@@ -56,7 +56,7 @@ function qw_page_handler(){
   }
   // else we need a list of queries
   else {
-    include QW_PLUGIN_DIR.'/admin/page-query-list.inc';
+    include QW_PLUGIN_DIR . '/admin/templates/page-query-list.inc';
     qw_list_queries_form();
   }
 }
@@ -87,7 +87,7 @@ function qw_edit_query_form(){
   }
   if ( !$row ){ return; }
 
-  $options = $row->options;
+  $options = $row->data;
   $display = array_map('stripslashes_deep',$options['display']);
   $image_sizes = get_intermediate_image_sizes();
   $file_styles = qw_all_file_styles();
@@ -134,6 +134,15 @@ function qw_edit_query_form(){
     $field['wrapper_form'] = theme('query_field', $args);
   }
 
+  // overrides
+  foreach($handlers['override']['items'] as $k => &$override){
+    $args = array(
+      'override' => $override,
+      'weight' => $override['weight'],
+    );
+    $override['wrapper_form'] = theme('query_override', $args);
+  }
+
   // start building edit page data
   $edit_args = array(
     // editor theme
@@ -150,6 +159,7 @@ function qw_edit_query_form(){
     'filters'   => $handlers['filter']['items'],
     'fields'    => $handlers['field']['items'],
     'sorts'     => $handlers['sort']['items'],
+    'overrides' => $handlers['override']['items'],
 
     // all datas
     'post_statuses' => qw_all_post_statuses(),
@@ -159,8 +169,9 @@ function qw_edit_query_form(){
     'page_templates'=> get_page_templates(),
     'post_types'    => qw_all_post_types(),
     'pager_types'   => qw_all_pager_types(),
-    'category_ids'  => get_terms('category', array('fields' => 'ids', 'hide_empty' => 0)),
-    'tags'          => get_tags(array('hide_empty' => false)),
+    //'category_ids'  => get_terms('category', array('fields' => 'ids', 'hide_empty' => 0)),
+    //'tags'          => get_tags(array('hide_empty' => false)),
+    'all_overrides' => qw_all_overrides(),
     'all_filters'   => qw_all_filters(),
     'all_fields'    => qw_all_fields(),
     'all_sorts'     => qw_all_sort_options(),
@@ -231,7 +242,7 @@ function qw_settings_page()
 /*
  * Create Query Page
  */
-function qw_create_query() {
+function qw_create_query_page() {
   $args = array(
     'title' => 'Create Query',
     'content' => theme('query_create')

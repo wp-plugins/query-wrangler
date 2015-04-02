@@ -49,69 +49,32 @@
       if($query_type == 'override')
       { ?>
         <!-- override settings -->
-        <div id="qw-override-settings" class="qw-query-admin-options qw-handler-items">
-          <h4>Override Settings</h4>
-
-          <!-- override categories -->
-          <div class="qw-handler-item">
-            <div class="qw-handler-item-title">Categories</div>
-            <div class="qw-handler-item-form">
-              <div class="qw-item-form">
-                <p>
-                  Select which categories to override.
-                </p>
-                <div class="qw-checkboxes">
-                  <?php
-                  // List all categories as checkboxes
-                  foreach($category_ids as $cat_id)
-                  {
-                    $cat_name = get_cat_name($cat_id);
-                    $cat_checked = (isset($options['override']['cats'][$cat_id])) ? 'checked="checked"' : '';
-                    ?>
-                    <label class="qw-query-checkbox">
-                      <input class="qw-js-title"
-                             type="checkbox"
-                             name="qw-query-options[override][cats][<?php print $cat_id; ?>]"
-                             value="<?php print $cat_name; ?>"
-                        <?php print $cat_checked; ?> />
-                      <?php print $cat_name; ?>
-                    </label>
-                  <?php
-                  }
-                  ?>
-                </div>
-              </div>
-            </div>
+        <div id="qw-query-overrides" class="qw-query-admin-options">
+          <div class="qw-query-add-titles">
+            <span class="qw-rearrange-title">
+              Rearrange
+            </span>
+            <span class="qw-add-title" data-handler-type="override" data-limit-per-type=1 data-form-id="qw-display-add-overrides">
+              Add
+            </span>
           </div>
-
-          <!-- override tags -->
-          <div class="qw-handler-item">
-            <div class="qw-handler-item-title">Tags</div>
-            <div class="qw-handler-item-form">
-              <div class="qw-item-form">
-                <p>
-                  Select which tags to override.
-                </p>
-                <div class="qw-checkboxes">
-                  <?php
-                  foreach($tags as $tag)
-                  {
-                    $tag_checked = (isset($options['override']['tags'][$tag->term_id])) ? 'checked="checked"' : '';
-                    ?>
-                    <label class="qw-query-checkbox">
-                      <input class="qw-js-title"
-                             type="checkbox"
-                             name="qw-query-options[override][tags][<?php print $tag->term_id; ?>]"
-                             value="<?php print $tag->name; ?>"
-                        <?php print $tag_checked; ?> />
-                      <?php print $tag->name; ?>
-                    </label>
-                  <?php
-                  }
-                  ?>
+          <h4>Overrides</h4>
+          <div class="qw-clear-gone"><!-- ie hack -->&nbsp;</div>
+          <div id="query-overrides" class="qw-handler-items">
+            <?php
+              foreach ( $overrides as $override )
+              { ?>
+                <div class="qw-handler-item">
+                  <div class="qw-handler-item-title"><?php print $override['title']; ?></div>
+                  <div class="qw-handler-item-form">
+                    <div class="qw-item-form">
+                      <?php print $override['wrapper_form']; ?>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
+                <?php
+              }
+            ?>
           </div>
         </div>
         <!-- /override settings -->
@@ -290,4 +253,30 @@
       ?>
     </div>
   </div>
+
+  <!-- all overrides -->
+  <div id="qw-display-add-overrides" data-handler-type="override">
+    <p class="description">
+      Select overrides to add to this query.
+      Limit 1 per type.</p>
+    <div class="qw-checkboxes">
+      <?php
+      // loop through overrides
+      foreach($all_overrides as $hook_key => $override)
+      {
+        ?>
+          <label class="qw-override-checkbox">
+            <input type="checkbox"
+                   value="<?php print $override['type']; ?>" />
+            <input class="qw-handler-hook_key"
+                   type="hidden"
+                   value="<?php print $override['hook_key']; ?>" />
+            <?php print $override['title']; ?>
+          </label>
+          <p class="description"><?php print $override['description']; ?></p>
+        <?php
+      }
+      ?>
+    </div>
+  </div>  
 </div><!-- options forms -->

@@ -9,7 +9,7 @@ Plugin URI:        http://daggerhart.com
 Description:       Query Wrangler provides an intuitive interface for creating complex WP queries as pages or widgets. Based on Drupal Views.
 Author:            Jonathan Daggerhart
 Author URI:        http://daggerhart.com
-Version:           1.5.31
+Version:           1.5.32
 
 ******************************************************************
 
@@ -30,10 +30,11 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
 // some useful definitions
-define('QW_VERSION', 1.531);
+define('QW_VERSION', 1.532);
 define('QW_PLUGIN_DIR', dirname(__FILE__));
 define('QW_PLUGIN_URL', plugins_url( '', __FILE__ ));
 define('QW_DEFAULT_THEME', 'views');
+define('QW_FORM_PREFIX', "qw-query-options");
 
 // Query Widget
 include_once QW_PLUGIN_DIR.'/widget.query.php';
@@ -51,10 +52,8 @@ function qw_init_frontend(){
   include_once QW_PLUGIN_DIR.'/includes/exposed.inc';
   include_once QW_PLUGIN_DIR.'/includes/handlers.inc';
   include_once QW_PLUGIN_DIR.'/includes/shortcodes.inc';
-  
-  //include_once QW_PLUGIN_DIR.'/includes/data.defaults.inc';
-  
-  //include_once QW_PLUGIN_DIR.'/includes/data.default_basics.inc';
+
+  // basics
   include_once QW_PLUGIN_DIR.'/includes/basics/display_title.inc';
   include_once QW_PLUGIN_DIR.'/includes/basics/template_styles.inc';
   include_once QW_PLUGIN_DIR.'/includes/basics/row_styles.inc';
@@ -68,7 +67,9 @@ function qw_init_frontend(){
   include_once QW_PLUGIN_DIR.'/includes/basics/page_path.inc';
   include_once QW_PLUGIN_DIR.'/includes/basics/page_template.inc';
   include_once QW_PLUGIN_DIR.'/includes/basics/pager.inc';
-  
+  include_once QW_PLUGIN_DIR.'/includes/basics/ignore_sticky_posts.inc';
+
+  // fields
   include_once QW_PLUGIN_DIR.'/includes/fields/default_fields.inc';
   include_once QW_PLUGIN_DIR.'/includes/fields/post_author.inc';
   include_once QW_PLUGIN_DIR.'/includes/fields/post_author_avatar.inc';
@@ -78,13 +79,14 @@ function qw_init_frontend(){
   include_once QW_PLUGIN_DIR.'/includes/fields/featured_image.inc';
   include_once QW_PLUGIN_DIR.'/includes/fields/callback_field.inc';
   
-  //include_once QW_PLUGIN_DIR.'/includes/data.default_filters.inc';
+  // filters
   include_once QW_PLUGIN_DIR.'/includes/filters/author.inc';
   include_once QW_PLUGIN_DIR.'/includes/filters/callback.inc';
   include_once QW_PLUGIN_DIR.'/includes/filters/post_types.inc';
   include_once QW_PLUGIN_DIR.'/includes/filters/post_id.inc';
   include_once QW_PLUGIN_DIR.'/includes/filters/meta_key.inc';
   include_once QW_PLUGIN_DIR.'/includes/filters/meta_key_value.inc';
+  include_once QW_PLUGIN_DIR.'/includes/filters/meta_query.inc';
   include_once QW_PLUGIN_DIR.'/includes/filters/meta_value.inc';
   include_once QW_PLUGIN_DIR.'/includes/filters/tags.inc';
   include_once QW_PLUGIN_DIR.'/includes/filters/categories.inc';
@@ -92,13 +94,21 @@ function qw_init_frontend(){
   include_once QW_PLUGIN_DIR.'/includes/filters/taxonomies.inc';
   include_once QW_PLUGIN_DIR.'/includes/filters/taxonomy_relation.inc';
   include_once QW_PLUGIN_DIR.'/includes/filters/search.inc';
-  
+
+  // sorts
   include_once QW_PLUGIN_DIR.'/includes/sorts/default_sorts.inc';
-  
+
+  // overrides
+  include_once QW_PLUGIN_DIR.'/includes/overrides/categories.inc';
+  include_once QW_PLUGIN_DIR.'/includes/overrides/tags.inc';
+  include_once QW_PLUGIN_DIR.'/includes/overrides/taxonomies.inc';
+
   // Necessary functions to show a query
   include_once QW_PLUGIN_DIR.'/includes/query.inc';
   include_once QW_PLUGIN_DIR.'/includes/theme.inc';
   include_once QW_PLUGIN_DIR.'/includes/pages.inc';
+  include_once QW_PLUGIN_DIR.'/includes/override.inc';
+  new QW_Override();
   
 }
 function qw_init(){
@@ -110,7 +120,7 @@ function qw_init(){
     if (get_option('qw_live_preview') === FALSE){
       add_option('qw_live_preview', 'on');
     }
-    include_once QW_PLUGIN_DIR.'/admin/query-admin.inc';
+    include_once QW_PLUGIN_DIR . '/admin/admin.inc';
     include_once QW_PLUGIN_DIR.'/admin/query-admin-pages.inc';
     include_once QW_PLUGIN_DIR.'/admin/ajax.inc';
     include_once QW_PLUGIN_DIR.'/admin/default_editors.inc';
@@ -162,7 +172,7 @@ function qw_menu()
   // http://codex.wordpress.org/Function_Reference/add_menu_page
   $list_page    = add_menu_page( 'Query Wrangler', 'Query Wrangler', 'manage_options', 'query-wrangler', 'qw_page_handler', '', $menu_placement);
   // http://codex.wordpress.org/Function_Reference/add_submenu_page
-  $create_page  = add_submenu_page( 'query-wrangler', 'Create New Query', 'Add New', 'manage_options', 'qw-create', 'qw_create_query');
+  $create_page  = add_submenu_page( 'query-wrangler', 'Create New Query', 'Add New', 'manage_options', 'qw-create', 'qw_create_query_page');
   $import_page  = add_submenu_page( 'query-wrangler', 'Import', 'Import', 'manage_options', 'qw-import', 'qw_import_page');
   $settings_page= add_submenu_page( 'query-wrangler', 'Settings', 'Settings', 'manage_options', 'qw-settings', 'qw_settings_page');
   //$debug_page  = add_submenu_page( 'query-wrangler', 'Debug', 'Debug', 'manage_options', 'qw-debug', 'qw_debug');

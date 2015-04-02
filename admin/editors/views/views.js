@@ -3,13 +3,13 @@
   QWViews = {
 
     // current open dialog
-    current_dialog: {},
+    current_dialog: null,
 
     // HTML id of current form in dialog
-    current_dialog_id: '',
+    current_dialog_id: null,
 
     // html clone of the form to be displayed
-    current_dialog_backup: '',
+    current_dialog_backup: null,
 
     /**
      * Initialize the views editor theme
@@ -48,14 +48,57 @@
     },
 
     /**
+     * Modify the $form to limit selectable values
+     *
+     * @param $form
+     * @param $wrapper
+     * @param limit
+     */
+    limitHandlerItems: function( $form, $wrapper, limit ){
+      var existing = {};
+
+      $wrapper.find('.qw-handler-item').each(function( index, item ){
+        var type = $(item).find('.qw-handler-item-type').val();
+        if ( existing[ type ] ) {
+          existing[ type ] += 1;
+        }
+        else {
+          existing[ type ] = 1;
+        }
+      });
+
+      $form.find('input[type=checkbox]').each(function( index, checkbox ){
+        var
+          $checkbox = $(checkbox),
+          type = $checkbox.val();
+
+        $checkbox.prop('disabled', false).parent().removeClass('qw-disabled-add-handler');
+
+        if ( existing[ type ] && existing[ type ] >= limit ){
+          $checkbox.prop('disabled', true).parent().addClass('qw-disabled-add-handler');
+        }
+      });
+    },
+
+    /**
      * Dialog box for adding new handler items
      */
     addHandlerItemsDialog: function(){
-      var handler = $(this).data('handler-type');
-      var title   = $(this).closest('.qw-query-admin-options').find('h4:first').text();
-      var id      = '#' + $(this).data('form-id');
+      var
+        $button   = $(this),
+        handler   = $button.data('handler-type'),
+        $wrapper  = $button.closest('.qw-query-admin-options'),
+        title     = $wrapper.find('h4:first').text(),
+        id        = $button.data('form-id'),
+        limit     = $button.data('limit-per-type'),
+        $form     = $('#' + id);
 
-      QWViews.openDialog( title , $(id), QWViews.addHandlerItems );
+      // overrides should be limited to 1
+      if ( limit ) {
+        QWViews.limitHandlerItems( $form, $wrapper, limit );
+      }
+
+      QWViews.openDialog( title, $form, id, QWViews.addHandlerItems );
     },
 
     /**
@@ -103,20 +146,26 @@
      */
     rearrangeHandlerItemsDialog: function(){
       var $wrapper = $(this).closest('.qw-query-admin-options').find('.qw-handler-items');
-      var wrapper_selector = '#' + $wrapper.attr('id');
-      QWViews.openDialog( $(this).text(), $wrapper );
+      var id = $wrapper.attr('id');
 
       // similar to sortables.init, but with some differences to the sortable setup
-      QueryWrangler.sortables.wrapper_selector = wrapper_selector;
+      QueryWrangler.sortables.wrapper_selector = '#' + id;
       QueryWrangler.sortables.item_selector = '.qw-handler-item';
 
-      $( wrapper_selector )
-        .sortable({
-          update: QueryWrangler.sortables.updateItemWeights
-        })
+      QWViews.openDialog( $(this).text(), $wrapper, id, QWViews.rearrangeUpdate );
+
+      $( QueryWrangler.sortables.wrapper_selector ).sortable()
         // avoid potential conflicts with other complicated ui elements and events
         .disableSelection();
       QueryWrangler.sortables.refresh();
+    },
+
+    /**
+     * Update after rearranging.
+     */
+    rearrangeUpdate: function(){
+      QueryWrangler.sortables.updateItemWeights();
+      QueryWrangler.generateFieldTokens();
     },
 
     /**
@@ -126,11 +175,18 @@
      * @param element - element to load into the dialog
      * @param update_callback - callback to execute after dialog Update button pressed
      */
-    openDialog: function( dialog_title, element, update_callback ){
+    openDialog: function( dialog_title, element, dialog_id, update_callback ){
       var $element = $(element);
 
-      QWViews.current_dialog_backup = $element.html();
-      QWViews.current_dialog_id = $element.find('.qw-item-form:first').attr('id');
+      QWViews.current_dialog_backup = $element.clone(true);
+
+      if ( typeof dialog_id !== 'undefined' ){
+        QWViews.current_dialog_id = dialog_id;
+      }
+      // look for it using element as a context
+      else {
+        QWViews.current_dialog_id = $element.find('.qw-item-form:first').attr('id');
+      }
 
       var args = {
         modal: true,
@@ -186,14 +242,12 @@
 
       if ( QWViews.current_dialog_id ){
         // replace the dialog contents with its backup
-        $('form#qw-edit-query-form')
-          .find('#' + QWViews.current_dialog_id)
-            .html( QWViews.current_dialog_backup );
+        QWViews.current_dialog_backup.replaceAll( $(element) );
 
         // clear the current dialog info
-        QWViews.current_dialog = {};
-        QWViews.current_dialog_id = '';
-        QWViews.current_dialog_backup = '';
+        QWViews.current_dialog = null;
+        QWViews.current_dialog_id = null;
+        QWViews.current_dialog_backup = null;
       }
     },
 
@@ -226,6 +280,8 @@
     removeHandlerItem: function( element ){
       $(element).dialog('destroy')
         .closest('.qw-handler-item').remove();
+
+      QueryWrangler.generateFieldTokens();
     }
   };
 

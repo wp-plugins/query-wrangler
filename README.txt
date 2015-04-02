@@ -26,12 +26,10 @@ Supports:
 
 Some examples of how you would use this plugin include:
 
+* Create a list posts with featured images
 * Create a list of pages or posts within a specific category or tag
 * Create an image gallery
 * Modify the way your category pages look
-* Create a category list widget with custom sorting
-
-[Introduction to Query Wrangler](http://www.widgetwrangler.com/forum/query-wrangler/general/intro-query-wrangler "Learn to setup Queries")
 
 
 == Installation ==
@@ -53,18 +51,20 @@ Easy, the code you're looking for is like this.   [query id=2] , where the numbe
 
 = Developer & Usage =
 
-* [Custom field example](https://gist.github.com/daggerhart/10417309 "Custom field example")
-* [Callback field usage: wp_get_attachment_url](http://wordpress.org/support/topic/add-php-in-rewrite-output-of-this-field?replies=3#post-5480638 "Callback field usage")
-* [Callback field usage: the_tags](http://wordpress.org/support/topic/callback-field-plugin-version-1524?replies=1#post-5487515 "Callback field usage 2")
-* [Meta Field Display Handler: Custom Content Type Manager](http://wordpress.org/support/topic/cant-put-php-code-into-rewrite-results-field?replies=4#post-5411970 "Meta Field Display Handler: Custom Content Type Manager")
 * [Meta Field Display Handler: Advanced Custom Fields](https://wordpress.org/support/topic/how-to-get-he-image-url-instead-of-image-id?replies=5#post-5411991 "Meta Field Display Handler: Advanced Custom Fields")
+* [Sort by Meta value](https://wordpress.org/support/topic/orderby-meta_value-1#post-6719953 "Sort a query by meta values")
+* [Meta Field Display Handler: Custom Content Type Manager](http://wordpress.org/support/topic/cant-put-php-code-into-rewrite-results-field?replies=4#post-5411970 "Meta Field Display Handler: Custom Content Type Manager")
+* [Custom field example](https://gist.github.com/daggerhart/10417309 "Custom field example")
+* [Field callback usage: wp_get_attachment_url](http://wordpress.org/support/topic/add-php-in-rewrite-output-of-this-field?replies=3#post-5480638 "Callback field usage")
+* [Field callback usage: the_tags](http://wordpress.org/support/topic/callback-field-plugin-version-1524?replies=1#post-5487515 "Callback field usage 2")
+* [Filter callback usage: ](https://wordpress.org/support/topic/filter-by-subquery?replies=3#post-6719945 "Filter Callback usage")
 * [Query Slideshow](http://wordpress.org/extend/plugins/query-slideshow/ "Query Slideshow") - Example of creating a custom style. Turn your queries into slideshows using jquery.cycle
 
 
 = What are overrides and how do I use them? =
 
 Overrides allow you to alter the display and information given on category and tag pages.
-For a simple example, add a new query and chose the type `override`.  Choose how you want the content to display, then examine the `Override Settings` options.
+For a simple example, add a new query and chose the type `override`.  Choose how you want the content to display, then examine the `Overrides` box.
 Select a category or multiple categories to override.   Save the query, then visit that category page.
 
 
@@ -73,6 +73,16 @@ Select a category or multiple categories to override.   Save the query, then vis
 1. Drupal Views Editor Theme
 
 == Changelog ==
+
+= 1.5.32 =
+
+* Better Overrides
+* Feature: meta_query filter
+* Feature: Override entire taxonomy
+* Feature: Extended callback field to include text parameters
+* Feature: Callback filter
+* UI bug fixes with rearranging handler items and field tokens
+* UI bug fix regarding canceling and new handler items dialog
 
 = 1.5.31 =
 
@@ -281,4 +291,4 @@ Select a category or multiple categories to override.   Save the query, then vis
 
 == Upgrade Notice ==
 
-1.5.31 Sweet new features and minor bug fixes
+1.5.32 Override entire taxonomies, new meta query filter, callback fields now have optional text parameters
