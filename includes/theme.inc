@@ -7,60 +7,6 @@
  * @return array All template arrays filtered so far by Wordpress' filter hook
  */
 function qw_templates($templates){
-  // preview query
-  $templates['query_preview'] = array(
-    'files' => 'admin/wrapper-preview.inc',
-    'default_path' => QW_PLUGIN_DIR,
-    'arguments' => array('options' => NULL),
-  );
-  // edit query template
-  $templates['query_edit'] = array(
-    'files' => 'admin/editors/[theme]/query-edit-[theme].inc',
-    'default_path' => QW_PLUGIN_DIR,
-    'arguments' => array(
-      'theme' => get_option('qw_edit_theme'),
-    ),
-  );
-  // create query template
-  $templates['query_create'] = array(
-    'files' => 'admin/page-query-create.inc',
-    'default_path' => QW_PLUGIN_DIR,
-  );
-  // import query template
-  $templates['query_import'] = array(
-    'files' => 'admin/page-query-import.inc',
-    'default_path' => QW_PLUGIN_DIR,
-  );
-  // import query template
-  $templates['query_settings'] = array(
-    'files' => 'admin/page-query-settings.inc',
-    'default_path' => QW_PLUGIN_DIR,
-  );
-  // export query template
-  $templates['query_export'] = array(
-    'files' => 'admin/page-query-export.inc',
-    'default_path' => QW_PLUGIN_DIR,
-    'arguments' => array(
-      'query_id' => 0,
-    ),
-  );
-// field template
-  $templates['query_field'] = array(
-    'files' => 'admin/wrapper-field.inc',
-    'default_path' => QW_PLUGIN_DIR,
-  );
-
-// filters edit form
-  $templates['query_filter'] = array(
-    'files' => 'admin/wrapper-filter.inc',
-    'default_path' => QW_PLUGIN_DIR,
-  );
-
-// sorts edit form
-  $templates['query_sort'] = array(
-    'files' => 'admin/wrapper-sort.inc',
-    'default_path' => QW_PLUGIN_DIR,
-  );
 
   // display queries style wrapper
   $templates['query_display_wrapper'] = array(
@@ -90,53 +36,6 @@ function qw_templates($templates){
       'rows' => array(),
     )
   );
-  // useful for plugin admin pages
-  $templates['admin_wrapper'] = array(
-    'files' => array(
-        'admin/wrapper-admin.inc',
-        'wrapper-admin.inc',
-    ),
-    'default_path' => QW_PLUGIN_DIR,
-    'arguments' => array(
-        'title' => 'Admin Page',
-        'content' => 'content goes here.',
-    ),
-  );
-
-  // filters
-  $filters = qw_all_filters();
-  foreach($filters as $type => $filter){
-    if(isset($filter['form_template'])){
-      $templates[$filter['form_template']] = array(
-        'arguments' => array(
-          'filter' => array()
-        )
-      );
-    }
-  }
-  // fields
-  $fields = qw_all_fields();
-  foreach($fields as $type => $field){
-    if(isset($field['form_template'])){
-      $templates[$field['form_template']] = array(
-        'arguments' => array(
-          'field' => array()
-        )
-      );
-    }
-  }
-
-  // sorts
-  $sorts = qw_all_sort_options();
-  foreach($sorts as $type => $sort){
-    if(isset($sort['form_template'])){
-      $templates[$sort['form_template']] = array(
-        'arguments' => array(
-          'sort' => array()
-        )
-      );
-    }
-  }
 
   return $templates;
 }
@@ -198,6 +97,7 @@ function theme_query_display_style_preprocess($template)
 function qw_template_query(&$qw_query, $options)
 {
   $results_count = count($qw_query->posts);
+  $options['meta']['results_count'] = $results_count;
   $content = '';
 
   // start building theme arguments
@@ -378,6 +278,9 @@ function qw_make_fields_rows(&$qw_query, $options)
           $rows[$i]['fields'][$field_name]['output'].= $this_post->{$field_settings['type']};
         }
 
+        // remember if any value was found
+        $empty = empty($rows[$i]['fields'][$field_name]['output']);
+
         // add token for replace
         $tokens['{{'.$field_name.'}}'] = $rows[$i]['fields'][$field_name]['output'];
 
@@ -404,11 +307,20 @@ function qw_make_fields_rows(&$qw_query, $options)
           $rows[$i]['fields'][$field_name]['output'] = '<label class="query-label">'.$field_settings['label'].'</label> '.$rows[$i]['fields'][$field_name]['output'];
         }
 
-        // apply shortcodes to field output
-        $rows[$i]['fields'][$field_name]['output'] = do_shortcode($rows[$i]['fields'][$field_name]['output']);
+        // the_content filter
+        if (isset($field_settings['apply_the_content'])) {
+          $rows[$i]['fields'][$field_name]['output'] = apply_filters('the_content', $rows[$i]['fields'][$field_name]['output']);
+        }
+        else {
+          // apply shortcodes to field output
+          $rows[$i]['fields'][$field_name]['output'] = do_shortcode($rows[$i]['fields'][$field_name]['output']);
+        }
+
+        // hide if empty
+        $hide = (isset($field_settings['hide_if_empty']) && $empty);
 
         // after all operations, remove if excluded
-        if(isset($field_settings['exclude_display'])){
+        if(isset($field_settings['exclude_display']) || $hide ){
           unset($rows[$i]['fields'][$field_name]['output']);
         }
       }
