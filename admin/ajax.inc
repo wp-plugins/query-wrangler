@@ -37,6 +37,11 @@ function qw_form_ajax()
       $all = qw_all_filters();
       break;
 
+    case 'override_form':
+      $template = 'query_override';
+      $all = qw_all_overrides();
+      break;
+
     case 'sort_sortable':
       $template = 'query_sort_sortable';
       $all = qw_all_sort_options();
@@ -83,6 +88,22 @@ function qw_form_ajax()
     $args['weight'] = $_POST['next_weight'];
   }
 
-  print theme($template, $args);
-  exit;
+  wp_send_json( array('template' => theme($template, $args) ) );
+}
+
+/*
+ * Random data grabs
+ */
+function qw_data_ajax()
+{
+  if ( isset($_POST['data']) ) {
+    switch ($_POST['data']){
+      case 'all_hooks':
+        $query_id = isset( $_POST['queryId'] ) ? $_POST['queryId'] : null;
+        $data = qw_edit_json( $query_id );
+
+        wp_send_json( $data );
+        break;
+    }
+  }
 }

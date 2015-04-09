@@ -104,10 +104,11 @@ function qw_exposed_submitted_data(){
     }
     else {
       if(is_array($v)){
+        array_walk_recursive($v, 'sanitize_text_field');
         $data[$k] = $v;
       }
       else {
-        $data[$k] = urldecode($v);
+        $data[$k] = sanitize_text_field( urldecode($v) );
       }
     }
   }
@@ -168,7 +169,7 @@ function qw_exposed_setting_type($filter)
       <?php
         foreach($opts as $value => $title)
         {
-          $selected = ($value == $filter['values']['exposed_settings']['type']) ? 'selected="selected"' : '';
+          $selected = (isset($filter['values']['exposed_settings']['type']) && $value == $filter['values']['exposed_settings']['type']) ? 'selected="selected"' : '';
           ?>
             <option value="<?php print $value; ?>" <?php print $selected; ?> ><?php print $title; ?></option>
           <?php
