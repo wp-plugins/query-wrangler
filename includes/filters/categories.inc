@@ -15,6 +15,11 @@ function qw_filter_categories($filters){
   return $filters;
 }
 
+/**
+ * Options for "categories" filter
+ *
+ * @param $filter
+ */
 function qw_filter_categories_form($filter){
   $cat_ops = array(
     "cat" => "Any category plus children categories",
@@ -25,11 +30,10 @@ function qw_filter_categories_form($filter){
   ?>
   <div class="qw-checkboxes">
     <?php
-      $category_ids = get_all_category_ids();
+    $categories = get_terms('category', array('fields' => 'id=>name', 'hide_empty' => 0));
       // List all categories as checkboxes
-      foreach($category_ids as $cat_id)
+      foreach($categories as $cat_id => $cat_name)
       {
-        $cat_name = get_cat_name($cat_id);
         $cat_checked = (isset($filter['values']['cats'][$cat_id])) ? 'checked="checked"' : '';
         ?>
         <label class="qw-query-checkbox">
@@ -61,12 +65,26 @@ function qw_filter_categories_form($filter){
   <?php
 }
 
-
+/**
+ * Alter the values for the given category operator
+ *
+ * @param $args
+ * @param $filter
+ */
 function qw_generate_query_args_categories(&$args, $filter){
-  if($filter['values']['cat_operator'] == 'cat' && is_array($filter['values']['cats'])){
-    $args[$filter['values']['cat_operator']] = implode(",", array_keys($filter['values']['cats']));
+  // category__not_in wants and array of term ids
+  if ( isset( $filter['values']['cat_operator'] ) && isset($filter['values']['cats']) ) {
+    if ($filter['values']['cat_operator'] == 'category__not_in' && is_array($filter['values']['cats'])) {
+      $args[$filter['values']['cat_operator']] = array_keys($filter['values']['cats']);
+    }
+    // cats wants a comma separated string
+    else if ($filter['values']['cat_operator'] == 'cat' && is_array($filter['values']['cats'])) {
+      $args[$filter['values']['cat_operator']] = implode(",",
+          array_keys($filter['values']['cats']));
+    }
   }
-  else {
+  //
+  else if ( isset($filter['values']['cats']) ) {
     $args[$filter['values']['cat_operator']] = $filter['values']['cats'];
   }
 }

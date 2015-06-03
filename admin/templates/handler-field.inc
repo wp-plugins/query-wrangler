@@ -4,6 +4,8 @@
   $label                    = (isset($field['values']['label'])) ? $field['values']['label'] : "";
   $rewrite_output_selected  = (isset($field['values']['rewrite_output'])) ? 'checked="checked"': '';
   $exclude_display_selected = (isset($field['values']['exclude_display'])) ? 'checked="checked"' : '';
+  $apply_the_content        = (isset($field['values']['apply_the_content'])) ? 'checked="checked"': '';
+  $hide_if_empty            = (isset($field['values']['hide_if_empty'])) ? 'checked="checked"': '';
 ?>
 <div id="qw-field-<?php print $field['name']; ?>" class="qw-field qw-sortable-item qw-item-form">
   <span class="qw-setting-header">
@@ -85,6 +87,27 @@
         </div>
       </div>
 
+      <?php
+        if ( isset($field['content_options']) && $field['content_options'] ) {
+          ?>
+          <label class='qw-field-checkbox'>
+            <input type='checkbox'
+                   name='<?php print $field['form_prefix']; ?>[apply_the_content]'
+              <?php print $apply_the_content; ?> />
+            Apply "the_content" filter to this field.
+          </label>
+          <?php
+        }
+      ?>
+
+    <!-- link -->
+    <label class='qw-field-checkbox'>
+      <input type='checkbox'
+             name='<?php print $field['form_prefix']; ?>[hide_if_empty]'
+        <?php print $hide_if_empty; ?> />
+      Hide field if empty
+    </label>
+
       <!-- rewrite output -->
       <div class="qw-options-group">
         <div class="qw-options-group-title">
@@ -97,7 +120,7 @@
         </div>
         <div class="qw-options-group-content qw-field-options-hidden">
           <textarea name='<?php print $field['form_prefix']; ?>[custom_output]'
-                    class="qw-field-textarea"><?php print ($field['values']['custom_output']) ? qw_textarea($field['values']['custom_output']): ''; ?></textarea>
+                    class="qw-field-textarea"><?php print (isset($field['values']['custom_output'])) ? qw_textarea($field['values']['custom_output']): ''; ?></textarea>
           <div class="qw-field-tokens">
             <p>
               Available replacement tokens.  These tokens will be replaced with the processed results of their fields.
