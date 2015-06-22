@@ -271,12 +271,18 @@ function qw_make_fields_rows(&$qw_query, $options)
       if ( is_singular() && get_the_ID() === $current_post_id ) {
         $field_classes[] = 'active-item';
       }
+      
+      // add additional classes defined in the field settings
+      if ( isset( $field_settings['classes'] ) && !empty( $field_settings['classes'] ) ){
+        $field_classes[] = $field_settings['classes'];
+      }
 
       $row['fields'][ $field_name ]['output'] = '';
       $row['fields'][ $field_name ]['classes'] = implode(" ",$field_classes);
 
       // get field details from all fields list
-      $field_defaults = $all_fields[$field_settings['type']];
+      $hook_key = qw_get_hook_key( $all_fields, $field_settings );
+      $field_defaults = $all_fields[$hook_key];
 
       // merge default data with values
       $field = array_merge($field_defaults, $field_settings);

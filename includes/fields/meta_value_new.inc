@@ -1,51 +1,48 @@
 <?php
 
 // add default fields to the hook filter
-add_filter('qw_fields', 'qw_field_meta_value');
+add_filter('qw_fields', 'qw_field_meta_value_new');
 
 /*
  * Add field to qw_fields
  */
-function qw_field_meta_value($fields){
-  $show_silent_meta = get_option('qw_show_silent_meta', false);
-
-  // add meta keys to field list
-  $meta = qw_get_meta_keys();
-  foreach($meta as $key){
-    $field_key = 'meta_'.str_replace(" ", "_", $key);
-
-    $key_is_not_silent = ( substr($key, 0, 1) != '_' && substr($key,0,3) != 'ww-' && substr($key,0,3) != 'ww_' );
-
-    // show all keys if show_silent_meta is true
-    // otherwise, show any key that is not silent
-    if( $show_silent_meta || $key_is_not_silent )
-    {
-      $fields[$field_key] = array(
-        'title' => 'Custom Field: '.$key,
-        'description' => 'Custom Field data with key: '.$key,
-        'output_callback' => 'qw_display_post_meta_value',
-        'output_arguments' => true,
-        'meta_key' => $key,
-        'form_callback' => 'qw_meta_value_form_callback',
-        'content_options' => true,
-      );
-      
-    }
-  }
+function qw_field_meta_value_new($fields){
+  $fields['custom_field'] = array(
+    'title' => 'Custom Field',
+    'description' => 'Select a custom field (meta value)',
+    'output_callback' => 'qw_display_post_meta_value_new',
+    'output_arguments' => true,
+    'form_callback' => 'qw_meta_value_new_form_callback',
+    'content_options' => true,
+    // need to dynamicall fix this on the the form and during output
+    'meta_key' => '', 
+  );
+  
   return $fields;
 }
-
 
 /*
  * Post Meta form settings
  */
-function qw_meta_value_form_callback($field){
+function qw_meta_value_new_form_callback($field){
+  $meta_key = isset( $field['values']['meta_key'] ) ? $field['values']['meta_key'] : '';
+
+  // pick up after the old meta_value field
+  // try to find the old meta_key
+  if ( empty( $meta_key ) && strpos( $field['type'], 'meta_' ) === 0 ){
+    $meta_key = substr( $field['type'], 5 );
+  }
+
   $separator = (isset($field['values']['meta_value_separator'])) ? $field['values']['meta_value_separator'] : '';
   $count = (isset($field['values']['meta_value_count'])) ? (int) $field['values']['meta_value_count'] : 1;
   $display_handlers = apply_filters('qw_meta_value_display_handlers', array());
   $are_image_ids = isset($field['values']['are_image_ids']) ? 'checked="checked"' : '';
   $image_styles = get_intermediate_image_sizes();
   ?>
+  <div>
+    <label>Meta Key:</label> <input type="text" name="<?php print $field['form_prefix']; ?>[meta_key]" value="<?php print $meta_key; ?>" />
+    <p class="description">The custom field name / meta key that identifies the field.</p>
+  </div>
   <div>
     <label>Count:</label> <input type="text" name="<?php print $field['form_prefix']; ?>[meta_value_count]" value="<?php print $count; ?>" />
     <p class="description">Number of the meta values to show.  User '0' for all values.</p>
@@ -104,34 +101,39 @@ function qw_meta_value_form_callback($field){
 /*
  * Display the post meta field based on field settings
  */
-function qw_display_post_meta_value($post, $field){
-  //dbw($field);
-  $display_handlers = apply_filters('qw_meta_value_display_handlers', array());
-  $display_handler_key = (isset($field['display_handler'])) ? $field['display_handler'] : 'none';
-  $handler = (isset($display_handlers[$display_handler_key])) ?  $display_handlers[$display_handler_key]: $display_handlers['none'];
-  
-  $count = (isset($field['meta_value_count'])) ? $field['meta_value_count'] : 1;
-  $separator = (isset($field['meta_value_separator'])) ? $field['meta_value_separator'] : '';
+function qw_display_post_meta_value_new($post, $field){
+  // pick up after the old meta_value field
+  // try to find the old meta_key
+  if ( empty( $field['meta_key'] ) && strpos( $field['type'], 'meta_' ) === 0 ) {
+    $field['meta_key'] = substr( $field['type'], 5 );
+  }
+
+  $display_handlers = apply_filters( 'qw_meta_value_display_handlers', array() );
+  $display_handler_key = isset( $field['display_handler'] ) ? $field['display_handler'] : 'none';
+  $handler = isset( $display_handlers[ $display_handler_key ] ) ?  $display_handlers[ $display_handler_key ]: $display_handlers['none'];
+
+  $count = isset( $field['meta_value_count'] ) ? $field['meta_value_count'] : 1;
+  $separator = isset( $field['meta_value_separator'] ) ? $field['meta_value_separator'] : '';
   $meta_values = array();
-  
-  if (function_exists($handler['callback'])){
-    $meta_values = $handler['callback']($post, $field);
+  $values = array();
+
+  if ( function_exists( $handler['callback'] ) ) {
+    $meta_values = $handler['callback']( $post, $field );
     
     // ensure we're working with an array
-    if (!is_array($meta_values)){
-      $meta_values = array($meta_values);
+    if ( !is_array( $meta_values ) ) {
+      $meta_values = array( $meta_values );
     }
   }
 
-  $values = array();
   // handle count limit
-  if ($count <= 0 || count($meta_values) <= $count){
+  if ($count <= 0 || count( $meta_values ) <= $count) {
     $values = $meta_values;
   }
   else {
     $i = 0;
-    foreach($meta_values as $k => $v){
-      if ($i < $count){
+    foreach( $meta_values as $k => $v ) {
+      if ( $i < $count ) {
         $values[] = $v;
       }
       $i++;
@@ -139,13 +141,13 @@ function qw_display_post_meta_value($post, $field){
   }
   
   // image ids
-  if (isset($field['are_image_ids'])){
+  if ( isset( $field['are_image_ids'] ) ) {
     $image_ids = $values;
     $values = array();
-    foreach ($image_ids as $image_id){
-      $values[] = wp_get_attachment_image($image_id, $field['image_display_style']);
+    foreach ( $image_ids as $image_id ) {
+      $values[] = wp_get_attachment_image( $image_id, $field['image_display_style'] );
     }
   }
-  
+
   return implode($separator, $values);
 }
