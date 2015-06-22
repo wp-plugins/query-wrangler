@@ -7,60 +7,6 @@
  * @return array All template arrays filtered so far by Wordpress' filter hook
  */
 function qw_templates($templates){
-  // preview query
-  $templates['query_preview'] = array(
-    'files' => 'admin/wrapper-preview.inc',
-    'default_path' => QW_PLUGIN_DIR,
-    'arguments' => array('options' => NULL),
-  );
-  // edit query template
-  $templates['query_edit'] = array(
-    'files' => 'admin/editors/[theme]/query-edit-[theme].inc',
-    'default_path' => QW_PLUGIN_DIR,
-    'arguments' => array(
-      'theme' => get_option('qw_edit_theme'),
-    ),
-  );
-  // create query template
-  $templates['query_create'] = array(
-    'files' => 'admin/page-query-create.inc',
-    'default_path' => QW_PLUGIN_DIR,
-  );
-  // import query template
-  $templates['query_import'] = array(
-    'files' => 'admin/page-query-import.inc',
-    'default_path' => QW_PLUGIN_DIR,
-  );
-  // import query template
-  $templates['query_settings'] = array(
-    'files' => 'admin/page-query-settings.inc',
-    'default_path' => QW_PLUGIN_DIR,
-  );
-  // export query template
-  $templates['query_export'] = array(
-    'files' => 'admin/page-query-export.inc',
-    'default_path' => QW_PLUGIN_DIR,
-    'arguments' => array(
-      'query_id' => 0,
-    ),
-  );
-// field template
-  $templates['query_field'] = array(
-    'files' => 'admin/wrapper-field.inc',
-    'default_path' => QW_PLUGIN_DIR,
-  );
-
-// filters edit form
-  $templates['query_filter'] = array(
-    'files' => 'admin/wrapper-filter.inc',
-    'default_path' => QW_PLUGIN_DIR,
-  );
-
-// sorts edit form
-  $templates['query_sort'] = array(
-    'files' => 'admin/wrapper-sort.inc',
-    'default_path' => QW_PLUGIN_DIR,
-  );
 
   // display queries style wrapper
   $templates['query_display_wrapper'] = array(
@@ -90,53 +36,6 @@ function qw_templates($templates){
       'rows' => array(),
     )
   );
-  // useful for plugin admin pages
-  $templates['admin_wrapper'] = array(
-    'files' => array(
-        'admin/wrapper-admin.inc',
-        'wrapper-admin.inc',
-    ),
-    'default_path' => QW_PLUGIN_DIR,
-    'arguments' => array(
-        'title' => 'Admin Page',
-        'content' => 'content goes here.',
-    ),
-  );
-
-  // filters
-  $filters = qw_all_filters();
-  foreach($filters as $type => $filter){
-    if(isset($filter['form_template'])){
-      $templates[$filter['form_template']] = array(
-        'arguments' => array(
-          'filter' => array()
-        )
-      );
-    }
-  }
-  // fields
-  $fields = qw_all_fields();
-  foreach($fields as $type => $field){
-    if(isset($field['form_template'])){
-      $templates[$field['form_template']] = array(
-        'arguments' => array(
-          'field' => array()
-        )
-      );
-    }
-  }
-
-  // sorts
-  $sorts = qw_all_sort_options();
-  foreach($sorts as $type => $sort){
-    if(isset($sort['form_template'])){
-      $templates[$sort['form_template']] = array(
-        'arguments' => array(
-          'sort' => array()
-        )
-      );
-    }
-  }
 
   return $templates;
 }
@@ -198,7 +97,7 @@ function theme_query_display_style_preprocess($template)
 function qw_template_query(&$qw_query, $options)
 {
   $results_count = count($qw_query->posts);
-  $content = '';
+  $options['meta']['results_count'] = $results_count;
 
   // start building theme arguments
   $wrapper_args = array(
@@ -220,8 +119,8 @@ function qw_template_query(&$qw_query, $options)
       'style' => $style['hook_key'],
       'options' => $options,
     );
+
     if (isset($options['display'][$style['settings_key']])){
-      
       $template_args['style_settings'] = $options['display'][$style['settings_key']];
     }
 
@@ -284,8 +183,10 @@ function qw_template_query(&$qw_query, $options)
  *
  */
 function qw_make_posts_rows(&$qw_query, $options){
-  $rows = array();
+  $groups = array();
   $i = 0;
+  $current_post_id = get_the_ID();
+
   while($qw_query->have_posts())
   {
     $qw_query->the_post();
@@ -294,12 +195,219 @@ function qw_make_posts_rows(&$qw_query, $options){
       'slug' => $options['meta']['slug'],
       'style' => $options['display']['post_settings']['size'],
     );
-    $rows[$i]['row_classes'] = qw_row_classes($i);
+
+    $row = array(
+      'row_classes' => qw_row_classes($i),
+    );
     $field_classes = array('query-post-wrapper');
-    $rows[$i]['fields'][$i]['classes'] = implode(" ",$field_classes);
-    $rows[$i]['fields'][$i]['output'] = theme('query_display_rows' , $template_args);
+
+	  // add class for active menu trail
+	  if ( is_singular() && get_the_ID() === $current_post_id ) {
+		  $field_classes[] = 'active-item';
+	  }
+
+    $row['fields'][ $i ]['classes'] = implode(" ",$field_classes);
+    $row['fields'][ $i ]['output'] = theme('query_display_rows' , $template_args);
+    $row['fields'][ $i ]['content'] = $row['fields'][ $i ]['output'];
+
+    // can't really group posts row style
+    $groups[ $i ][ $i ] = $row;
     $i++;
   }
+
+  $rows = qw_make_groups_rows( $groups );
+
+  return $rows;
+}
+
+/*
+ * Build array of fields and rows for templating
+ *
+ * @param object $new_query WP_Query object generated
+ * @param array $display Query display data
+ * @return array Executed query rows
+ */
+function qw_make_fields_rows(&$qw_query, $options)
+{
+  $display = $options['display'];
+  $all_fields = qw_all_fields();
+  $groups = array();
+  $tokens = array();
+  $current_post_id = get_the_ID();
+
+  // the query needs fields
+  if ( empty( $display['field_settings']['fields'] ) || ! is_array( $display['field_settings']['fields'] ) ){
+    return array();
+  }
+
+  // sort according to weights
+  uasort( $display['field_settings']['fields'], 'qw_cmp' );
+
+  // look for selected group by field
+  $group_by_field_name = null;
+  if ( isset( $display['field_settings']['group_by_field'] ) ){
+    $group_by_field_name = $display['field_settings']['group_by_field'];
+  }
+
+  // loop through each post
+  $i = 0;
+  while($qw_query->have_posts())
+  {
+    $qw_query->the_post();
+    //
+    $this_post = $qw_query->post;
+    $row = array(
+      'row_classes' => qw_row_classes($i),
+    );
+
+    // loop through each field
+    foreach($display['field_settings']['fields'] as $field_name => $field_settings)
+    {
+      // field open
+      $field_classes = array('query-field');
+      $field_classes[] = 'query-field-'.$field_settings['name'];
+
+      // add class for active menu trail
+      if ( is_singular() && get_the_ID() === $current_post_id ) {
+        $field_classes[] = 'active-item';
+      }
+      
+      // add additional classes defined in the field settings
+      if ( isset( $field_settings['classes'] ) && !empty( $field_settings['classes'] ) ){
+        $field_classes[] = $field_settings['classes'];
+      }
+
+      $row['fields'][ $field_name ]['output'] = '';
+      $row['fields'][ $field_name ]['classes'] = implode(" ",$field_classes);
+
+      // get field details from all fields list
+      $hook_key = qw_get_hook_key( $all_fields, $field_settings );
+      $field_defaults = $all_fields[$hook_key];
+
+      // merge default data with values
+      $field = array_merge($field_defaults, $field_settings);
+      
+      // look for callback
+      if(isset($field_defaults['output_callback']) && function_exists($field_defaults['output_callback']))
+      {
+        // callbacks with token arguments
+        if (isset($field_defaults['output_arguments'])){
+          $row['fields'][ $field_name ]['output'].= $field_defaults['output_callback']($this_post, $field, $tokens);
+        }
+        // normal callback w/o arguments
+        else {
+          $row['fields'][ $field_name ]['output'].= $field_defaults['output_callback']();
+        }
+      }
+      // use field itself
+      else {
+        $row['fields'][ $field_name ]['output'].= $this_post->{$field_settings['type']};
+      }
+
+      // remember if any value was found
+      $row['is_empty'] = empty($row['fields'][ $field_name ]['output']);
+
+      // add token for replace
+      $tokens['{{'.$field_name.'}}'] = $row['fields'][ $field_name ]['output'];
+
+      // look for rewrite output
+      if(isset($field_settings['rewrite_output'])){
+        // replace tokens with results
+        $field_settings['custom_output'] = str_replace(array_keys($tokens), array_values($tokens), $field_settings['custom_output']);
+        $row['fields'][ $field_name ]['output'] = $field_settings['custom_output'];
+      }
+
+      // apply link to field
+      if(isset($field_settings['link'])){
+        $row['fields'][ $field_name ]['output'] = '<a class="query-field-link" href="'.get_permalink().'">'.$row['fields'][ $field_name ]['output'].'</a>';
+      }
+      
+      // get default field label for tables
+      $row['fields'][ $field_name ]['label'] = (isset($field_settings['has_label'])) ? $field_settings['label'] : '';
+
+      // apply labels to full style fields
+      if(isset($field_settings['has_label']) &&
+         $display['type'] != 'full' &&
+         $display['style'] != 'table')
+      {
+        $row['fields'][ $field_name ]['output'] = '<label class="query-label">'.$field_settings['label'].'</label> '.$row['fields'][ $field_name ]['output'];
+      }
+
+      // the_content filter
+      if (isset($field_settings['apply_the_content'])) {
+        $row['fields'][ $field_name ]['output'] = apply_filters('the_content', $row['fields'][ $field_name ]['output']);
+      }
+      else {
+        // apply shortcodes to field output
+        $row['fields'][ $field_name ]['output'] = do_shortcode($row['fields'][ $field_name ]['output']);
+      }
+
+      // save a copy of the field output in case it is excluded, but we need it later
+      $row['fields'][ $field_name ]['content'] = $row['fields'][ $field_name ]['output'];
+
+      // hide if empty
+      $row['hide'] = (isset($field_settings['hide_if_empty']) && $row['is_empty']);
+
+      // after all operations, remove if excluded
+      if(isset($field_settings['exclude_display']) || $row['hide'] ){
+        unset( $row['fields'][ $field_name ]['output'] );
+      }
+    }
+
+    // default group by data
+    $group_hash = md5( $i );
+
+    // if set, hash the output of the group_by_field
+    if ( $group_by_field_name && isset( $row['fields'][ $group_by_field_name ] ) ) {
+      $group_hash = md5( $row['fields'][ $group_by_field_name ]['content'] );
+    }
+
+    $groups[ $group_hash ][ $i ] = $row;
+
+    // increment row
+    $i++;
+  }
+
+  $rows = qw_make_groups_rows( $groups, $group_by_field_name );
+
+  return $rows;
+}
+
+/**
+ * Convert multi-dimensional groups of rows into single-dimension of rows
+ *
+ * @param $groups
+ * @param $group_by_field_name
+ * @return array
+ */
+function qw_make_groups_rows( $groups, $group_by_field_name = null ){
+  $rows = array();
+
+  if ( !empty( $groups ) ) {
+    foreach ( $groups as $group ){
+      $first_row = reset( $group );
+
+      // group row
+      if ( $group_by_field_name && isset( $first_row['fields'][ $group_by_field_name ] ) ) {
+
+        // create the row that acts as the group header
+        $rows[] = array(
+          'row_classes' => 'query-group-row',
+          'fields' => array(
+            $group_by_field_name => array(
+              'classes' => 'query-group-row-field',
+              'output' => $first_row['fields'][ $group_by_field_name ]['content']
+            ),
+          ),
+        );
+      }
+
+      foreach ( $group as $row ){
+        $rows[] = $row;
+      }
+    }
+  }
+
   return $rows;
 }
 
@@ -312,110 +420,4 @@ function qw_row_classes($i){
   $row_classes[] = 'query-row-'.$i;
 
   return implode(" ", $row_classes);
-}
-
-/*
- * Build array of fields and rows for templating
- *
- * @param object $new_query WP_Query objecte generated
- * @param array $display Query display data
- * @return array Executed query rows
- */
-function qw_make_fields_rows(&$qw_query, $options)
-{
-  $display = $options['display'];
-  $all_fields = qw_all_fields();
-  $rows = array();
-  $tokens = array();
-
-  // loop through each post
-  $i = 0;
-  while($qw_query->have_posts())
-  {
-    $qw_query->the_post();
-    //
-    $this_post = $qw_query->post;
-    $rows[$i] = array();
-
-    // make row classes
-    $rows[$i]['row_classes'] = qw_row_classes($i);
-
-    if(is_array($display['field_settings']['fields']))
-    {
-      // sort according to weights
-      uasort($display['field_settings']['fields'],'qw_cmp');
-
-      // loop through each field
-      foreach($display['field_settings']['fields'] as $field_name => $field_settings)
-      {
-        // field open
-        $field_classes = array('query-field');
-        $field_classes[] = 'query-field-'.$field_settings['name'];
-
-        $rows[$i]['fields'][$field_name]['output'] = '';
-        $rows[$i]['fields'][$field_name]['classes'] = implode(" ",$field_classes);
-
-        // get field details from all fields list
-        $field_defaults = $all_fields[$field_settings['type']];
-
-        // merge default data with values
-        $field = array_merge($field_defaults, $field_settings);
-        
-        // look for callback
-        if(isset($field_defaults['output_callback']) && function_exists($field_defaults['output_callback']))
-        {
-          // callbacks with token arguments
-          if (isset($field_defaults['output_arguments'])){
-            $rows[$i]['fields'][$field_name]['output'].= $field_defaults['output_callback']($this_post, $field, $tokens);
-          }
-          // normal callback w/o arguments
-          else {
-            $rows[$i]['fields'][$field_name]['output'].= $field_defaults['output_callback']();
-          }
-        }
-        // use field itself
-        else {
-          $rows[$i]['fields'][$field_name]['output'].= $this_post->{$field_settings['type']};
-        }
-
-        // add token for replace
-        $tokens['{{'.$field_name.'}}'] = $rows[$i]['fields'][$field_name]['output'];
-
-        // look for rewrite output
-        if(isset($field_settings['rewrite_output'])){
-          // replace tokens with results
-          $field_settings['custom_output'] = str_replace(array_keys($tokens), array_values($tokens), $field_settings['custom_output']);
-          $rows[$i]['fields'][$field_name]['output'] = $field_settings['custom_output'];
-        }
-
-        // apply link to field
-        if(isset($field_settings['link'])){
-          $rows[$i]['fields'][$field_name]['output'] = '<a class="query-field-link" href="'.get_permalink().'">'.$rows[$i]['fields'][$field_name]['output'].'</a>';
-        }
-        
-        // get default field label for tables
-        $rows[$i]['fields'][$field_name]['label'] = (isset($field_settings['has_label'])) ? $field_settings['label'] : '';
-
-        // apply labels to full style fields
-        if(isset($field_settings['has_label']) &&
-           $display['type'] != 'full' &&
-           $display['style'] != 'table')
-        {
-          $rows[$i]['fields'][$field_name]['output'] = '<label class="query-label">'.$field_settings['label'].'</label> '.$rows[$i]['fields'][$field_name]['output'];
-        }
-
-        // apply shortcodes to field output
-        $rows[$i]['fields'][$field_name]['output'] = do_shortcode($rows[$i]['fields'][$field_name]['output']);
-
-        // after all operations, remove if excluded
-        if(isset($field_settings['exclude_display'])){
-          unset($rows[$i]['fields'][$field_name]['output']);
-        }
-      }
-    }
-    // increment row
-    $i++;
-  }
-
-  return $rows;
 }

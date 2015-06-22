@@ -9,8 +9,6 @@ function qw_all_handlers(){
   $handlers = apply_filters('qw_handlers', array());
   foreach ($handlers as $hook_key => $handler) {
     $handlers[$hook_key]['hook_key'] = $hook_key;
-    // adjust form prefix
-    $handlers[$hook_key]['form_prefix'] = 'qw-query-options'.$handlers[$hook_key]['form_prefix'];
     $handlers[$hook_key]['all_items'] = $handler['all_callback']();
   }
   return $handlers;
@@ -29,7 +27,7 @@ function qw_all_basic_settings(){
   $basics = apply_filters('qw_basics', array());
   
   foreach($basics as $hook_key => $basic){
-    $basics[$hook_key]['form_prefix'] = 'qw-query-options['.$basic['option_type'].']';
+    $basics[$hook_key]['form_prefix'] = QW_FORM_PREFIX .'['.$basic['option_type'].']';
     $basics[$hook_key]['hook_key'] = $hook_key;
   }
   return $basics;
@@ -80,6 +78,32 @@ function qw_all_filters(){
   array_multisort($titles, SORT_ASC, $filters);
 
   return $filters;
+}
+
+/*
+ * overrides Hook
+ */
+function qw_all_overrides(){
+  $overrides = apply_filters('qw_overrides', array());
+
+  foreach($overrides as $type => $override){
+    // set override's type as a value if not provided by override
+    if( empty( $override['type'] ) ){
+      $overrides[$type]['type'] = $type;
+    }
+
+    // maintain the hook's key
+    $overrides[$type]['hook_key'] = $type;
+  }
+
+  // sort them by title
+  $titles = array();
+  foreach ($overrides as $key => $override) {
+    $titles[$key] = $override['title'];
+  }
+  array_multisort($titles, SORT_ASC, $overrides);
+
+  return $overrides;
 }
 
 /*
@@ -141,7 +165,7 @@ function qw_all_styles(){
 
   foreach($styles as $hook_key => $style){
     $styles[$hook_key]['hook_key'] = $hook_key;
-    $styles[$hook_key]['form_prefix'] = 'qw-query-options[display]['.$hook_key.'_settings]';
+    $styles[$hook_key]['form_prefix'] = QW_FORM_PREFIX . '[display]['.$hook_key.'_settings]';
 
     if(!isset($style['settings_key'])){
       $styles[$hook_key]['settings_key'] = $hook_key.'_settings';
@@ -216,4 +240,71 @@ function qw_all_pager_types(){
  */
 function qw_default_template_file() {
 	return apply_filters('qw_default_template_file','index.php');
+}
+
+
+/**
+ * default custom_field (meta_value_new) field display handlers
+ */
+// add default meta value handlers
+add_filter('qw_meta_value_display_handlers', 'qw_meta_value_display_handlers_default');
+
+/*
+ * Default meta value handlers
+ */
+function qw_meta_value_display_handlers_default($handlers){
+  $handlers['none'] = array(
+    'title' => '-none-',
+    'callback' => 'qw_get_post_meta',
+  );
+  // advanced custom fields: http://wordpress.org/plugins/advanced-custom-fields/
+  if (function_exists('get_field')){
+    $handlers['acf_default'] = array(
+      'title' => 'Advanced Custom Fields: get_field',
+      'callback' => 'qw_get_acf_field',
+    );
+  }
+  // cctm: https://wordpress.org/plugins/custom-content-type-manager/
+  if (function_exists('get_custom_field')){
+    $handlers['cctm_default'] = array(
+      'title' => 'CCTM: get_custom_field',
+      'callback' => 'qw_get_cctm_field',
+    );
+  }
+
+  return $handlers;
+}
+
+/*
+ * return simple get_post_meta array
+ */
+function qw_get_post_meta($post, $field){
+  return get_post_meta($post->ID, $field['meta_key']);
+}
+
+/*
+ * Advanced custom field generic handler
+ */
+function qw_get_acf_field($post, $field){
+  $output = '';
+  if (function_exists('get_field')){
+    $output = get_field($field['meta_key'], $post->ID);
+  }
+  return $output;
+}
+
+/*
+ * Custom Content Type Manager generic field handler
+ */
+function qw_get_cctm_field($post, $field){
+  $output = '';
+  if (function_exists('get_custom_field')){
+    $field_name = $field['meta_key'];
+    if (isset($field['cctm_chaining']) && !empty($field['cctm_chaining'])){
+      $field_name = $field_name . $field['cctm_chaining'];
+    }
+
+    $output = get_custom_field($field_name);
+  }
+  return $output;
 }

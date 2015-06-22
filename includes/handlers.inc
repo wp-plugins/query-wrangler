@@ -11,6 +11,7 @@ function qw_handlers_default($handlers){
     'description' => 'Select Fields to add to this query output.',
     'data_callback' => 'qw_handler_field_data',
     'all_callback' => 'qw_all_fields',
+    // relative to base
     'form_prefix' => '[display][field_settings][fields]',
     'wrapper_template' => 'query_field',
   );
@@ -19,6 +20,7 @@ function qw_handlers_default($handlers){
     'description' => 'Select options for sorting the query results.',
     'data_callback' => 'qw_handler_sort_data',
     'all_callback' => 'qw_all_sort_options',
+    // relative to base
     'form_prefix' => '[args][sorts]',
     'wrapper_template' => 'query_sort',
   );
@@ -27,33 +29,35 @@ function qw_handlers_default($handlers){
     'description' => 'Select filters to affect the query results.',
     'data_callback' => 'qw_handler_filter_data',
     'all_callback' => 'qw_all_filters',
+    // relative to base
     'form_prefix' => '[args][filters]',
     'wrapper_template' => 'query_filter',
   );
-/* Disabled for now
-  $handlers['contextual_filter'] = array(
-    'title' => 'Contextual Filter',
-    'description' => 'Select contextual filters to affect the query results based on the context of where the query is displayed.',
-    'data_callback' => 'qw_handler_contextual_filter_data',
-    'all_callback' => 'qw_all_contextual_filters',
-    'form_prefix' => '[args][contextual_filters]',
-    'wrapper_template' => 'query_contextual_filter',
+  $handlers['override'] = array(
+    'title' => 'Override',
+    'description' => 'Select overrides to affect the query results based on the context of where the query is displayed.',
+    'data_callback' => 'qw_handler_override_data',
+    'all_callback' => 'qw_all_overrides',
+    // relative to base
+    'form_prefix' => '[override]',
+    'wrapper_template' => 'query_override',
   );
-*/
   return $handlers;
 }
 
-/*
- * Template Wrangler templates
+/**
+ * Filter to add handler wrapper templates to tw
+ * @param $templates
+ *
+ * @return mixed
  */
 function qw_handlers_templates($templates){
-
   $handlers = qw_all_handlers();
 
   foreach($handlers as $type => $handler){
     // wrapper edit form
-    $templates[$handler['wrapper_template']] = array(
-      'files' => 'admin/wrapper-'.$type.'.php',
+    $templates[ $handler['wrapper_template'] ] = array(
+      'files' => 'admin/templates/handler-'.$type.'.inc',
       'default_path' => QW_PLUGIN_DIR,
     );
 
@@ -63,24 +67,16 @@ function qw_handlers_templates($templates){
     // look for templates within all items
     foreach($all as $type => $item){
       // form template
-      if(isset($item['form_template'])){
-        $templates[$item['form_template']] = array(
+      if( isset( $item['form_template'] ) ) {
+        $templates[ $item['form_template'] ] = array(
           'arguments' => array(
             $type => array()
           )
         );
       }
-      /*/ exposed settings form templates
-      if(isset($item['exposed_settings_form_template'])){
-        $templates[$item['exposed_settings_form_template']] = array(
-          'arguments' => array(
-            $type => array()
-          )
-        );
-      }
-      // */
     }
   }
+
   return $templates;
 }
 
@@ -102,13 +98,12 @@ function qw_handler_filter_data($options){
     return $options['args']['filters'];
   }
 }
-/*
-function qw_handler_contextual_filter_data($options){
-  if (isset($options['args']['contextual_filters'])){
-    return $options['args']['contextual_filters'];
+function qw_handler_override_data($options){
+  if (isset($options['override'])){
+    return $options['override'];
   }
 }
-*/
+
 /*
  * Organize an existing filters and give it all the data they needs
  *
@@ -129,9 +124,6 @@ function qw_preprocess_handlers($options){
     // load all our default handlers
     if (is_array($handler['items']))
     {
-      // sort according to weights
-      uasort($handler['items'],'qw_cmp');
-
       $all = $handler['all_items'];
 
       // generate the form name prefixes
@@ -140,14 +132,18 @@ function qw_preprocess_handlers($options){
         // load sort type data
         $hook_key = qw_get_hook_key($all, $values);
 
+        if ( empty($hook_key )) {
+          $hook_key = !empty( $values['hook_key'] ) ? $values['hook_key'] : $name;
+        }
+
         $this_item = $all[$hook_key];
 
         // copy type, hook_key, and weight to top level of array
         $this_item['name'] = $name;
-        $this_item['type'] = $values['type'];
-        $this_item['weight'] = $values['weight'];
-        $this_item['hook_key'] = $values['hook_key'];
-        $this_item['form_prefix'] = $handler['form_prefix'].'['.$name.']';
+        $this_item['type'] = !empty( $values['type'] ) ? $values['type'] : $name;
+        $this_item['weight'] = !empty( $values['weight'] ) ? $values['weight'] : 0;
+        $this_item['hook_key'] = $hook_key;
+        $this_item['form_prefix'] = QW_FORM_PREFIX . $handler['form_prefix'].'['.$name.']';
 
         // values are own array
         $this_item['values'] = $values;
@@ -158,10 +154,14 @@ function qw_preprocess_handlers($options){
         $handlers[$type]['items'][$name] = $this_item;
       }
     }
+    else {
+      // empty array by default
+      $handlers[$type]['items'] = array();
+    }
 
-    // sort sorts according to weight
-    if(is_array($handlers[$type]['items'])){
-      uasort($handlers[$type]['items'], 'qw_cmp');
+    // sort according to weight
+    if( is_array( $handlers[ $type ]['items'] ) ){
+      uasort( $handlers[ $type ]['items'], 'qw_cmp' );
     }
   }
 

@@ -31,12 +31,15 @@ $display = "<pre>".htmlentities(print_r($options['display'], true))."</pre>";
 
 $new_query = "<pre>".htmlentities(print_r($wp_query,true))."</pre>";
 
+$all_options =  "<pre>".htmlentities(print_r($options,true))."</pre>";
+
 // return
 $preview = array(
   'preview' => $preview,
   'php_wpquery' => $php_wpquery,
   'args' => $args,
   'display' => $display,
+  'options' => $all_options,
   'wpquery' => $new_query,
   'templates' => $templates,
 );
@@ -87,7 +90,12 @@ function qw_template_scan($options)
   $templates['style'] = theme('query_display_rows', $template_args);
 
   if ($row_style['hook_key'] == "posts"){
-    $row_style_settings = $options['display'][$row_style['hook_key'].'_settings'];//$options['display']['row_style_settings'][$row_style['hook_key']];
+
+    $row_style_settings = array( 'size' => 'complete' );
+
+    if ( isset( $options['display'][$row_style['hook_key'].'_settings'] ) ) {
+      $row_style_settings =  $options['display'][$row_style['hook_key'].'_settings'];
+    }
 
     $template_args = array(
       'template' => 'query-'.$row_style_settings['size'],
