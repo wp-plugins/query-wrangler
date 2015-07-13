@@ -9,7 +9,7 @@ Plugin URI:        http://daggerhart.com
 Description:       Query Wrangler provides an intuitive interface for creating complex WP queries as pages or widgets. Based on Drupal Views.
 Author:            Jonathan Daggerhart
 Author URI:        http://daggerhart.com
-Version:           1.5.35
+Version:           1.5.36
 
 ******************************************************************
 
@@ -30,7 +30,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
 // some useful definitions
-define('QW_VERSION', 1.535);
+define('QW_VERSION', 1.536);
 define('QW_PLUGIN_DIR', dirname(__FILE__));
 define('QW_PLUGIN_URL', plugins_url( '', __FILE__ ));
 define('QW_DEFAULT_THEME', 'views');
@@ -75,11 +75,19 @@ function qw_init_frontend(){
   include_once QW_PLUGIN_DIR.'/includes/fields/post_author_avatar.inc';
   include_once QW_PLUGIN_DIR.'/includes/fields/file_attachment.inc';
   include_once QW_PLUGIN_DIR.'/includes/fields/image_attachment.inc';
-  include_once QW_PLUGIN_DIR.'/includes/fields/meta_value.inc';
-  //include_once QW_PLUGIN_DIR.'/includes/fields/meta_value_new.inc';
   include_once QW_PLUGIN_DIR.'/includes/fields/featured_image.inc';
   include_once QW_PLUGIN_DIR.'/includes/fields/callback_field.inc';
-  
+
+  // meta value field as a setting
+  $meta_value_handler = (int) get_option( 'qw_meta_value_field_handler', 0 );
+
+  if ( $meta_value_handler === 1 ){
+    include_once QW_PLUGIN_DIR.'/includes/fields/meta_value_new.inc';
+  }
+  else {
+    include_once QW_PLUGIN_DIR.'/includes/fields/meta_value.inc';
+  }
+
   // filters
   include_once QW_PLUGIN_DIR.'/includes/filters/author.inc';
   include_once QW_PLUGIN_DIR.'/includes/filters/callback.inc';
